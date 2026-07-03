@@ -1,6 +1,7 @@
 'use client'
 import React, { useState } from 'react';
 import { Menu, X, ArrowRight } from 'lucide-react';
+import { usePathname } from 'next/navigation';
 import ViewMedicinesModal from '@/components/products/ViewMedicinesModal';
 import OrderMedicinesModal from '@/components/products/OrderMedicinesModal';
 
@@ -15,6 +16,7 @@ const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
+  const pathname = usePathname();
 
   return (
     <>
@@ -60,22 +62,29 @@ const Navbar = () => {
 
             {/* Desktop Menu */}
             <div className="hidden md:flex space-x-1 lg:space-x-2 items-center">
-              {navLinks.map((link) => (
-                <a
-                  key={link.name}
-                  href={link.href}
-                  className="px-4 py-2 text-[16px] font-medium text-slate-600 rounded-full hover:text-sky-600 hover:bg-white/80 transition-colors duration-200"
-                >
-                  {link.name}
-                </a>
-              ))}
+              {navLinks.map((link) => {
+                const isActive = pathname === link.href;
+                return (
+                  <a
+                    key={link.name}
+                    href={link.href}
+                    className={`px-4 py-2 text-[16px] font-semibold rounded-full transition-all duration-200 ${
+                      isActive 
+                        ? 'text-[#0284C7] bg-white border border-sky-100 shadow-sm' 
+                        : 'text-slate-600 hover:text-sky-600 hover:bg-white/80'
+                    }`}
+                  >
+                    {link.name}
+                  </a>
+                );
+              })}
             </div>
 
-            {/* Sky Blue CTA Button & Order Button (Desktop) */}
+            {/* Highlighted Explore Products & Pulsing Order Button (Desktop) */}
             <div className="hidden md:flex items-center gap-3 ml-4">
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-[#0284C7] rounded-full hover:bg-white/80 transition-colors duration-200 cursor-pointer"
+                className="group flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold text-[#0284C7] bg-[#EAF6FF] hover:bg-[#0284C7] hover:text-white border border-[#0284C7]/30 rounded-full transition-all duration-300 shadow-sm cursor-pointer hover:shadow-md active:scale-95"
               >
                 Explore Products
               </button>
@@ -109,16 +118,23 @@ const Navbar = () => {
           }`}
         >
           <div className="px-4 pt-4 pb-6 space-y-1">
-            {navLinks.map((link) => (
-              <a
-                key={link.name}
-                href={link.href}
-                className="block px-4 py-3 text-[16px] font-medium text-slate-600 hover:bg-white/80 hover:text-sky-600 rounded-lg transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                {link.name}
-              </a>
-            ))}
+            {navLinks.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <a
+                  key={link.name}
+                  href={link.href}
+                  className={`block px-4 py-3 text-[16px] rounded-lg transition-colors ${
+                    isActive
+                      ? 'text-[#0284C7] bg-[#EAF6FF] font-bold border-l-4 border-[#0284C7]'
+                      : 'text-slate-600 hover:bg-white/80 hover:text-sky-600 font-medium'
+                  }`}
+                  onClick={() => setIsOpen(false)}
+                >
+                  {link.name}
+                </a>
+              );
+            })}
             {/* Mobile CTA Buttons */}
             <div className="pt-4 pb-2 flex flex-col gap-2">
               <button
@@ -126,7 +142,7 @@ const Navbar = () => {
                   setIsOpen(false);
                   setIsModalOpen(true);
                 }}
-                className="flex items-center justify-center gap-2 w-full px-6 py-2.5 text-sm font-semibold text-[#0284C7] bg-white border border-[#0284C7]/20 rounded-xl hover:bg-[#EAF6FF] transition-all cursor-pointer"
+                className="flex items-center justify-center gap-2 w-full px-6 py-2.5 text-sm font-bold text-[#0284C7] bg-[#EAF6FF] border border-[#0284C7]/20 rounded-xl hover:bg-[#0284C7] hover:text-white transition-all cursor-pointer shadow-sm"
               >
                 Explore Products
               </button>
@@ -136,7 +152,7 @@ const Navbar = () => {
                   setIsOpen(false);
                   setIsOrderModalOpen(true);
                 }}
-                className="flex items-center justify-center gap-2 w-full px-6 py-3.5 text-sm font-bold text-white bg-[#0284C7] rounded-xl hover:bg-[#075985] shadow-md shadow-sky-500/20 transition-all active:scale-[0.98] cursor-pointer"
+                className="flex items-center justify-center gap-2 w-full px-6 py-3.5 text-sm font-bold text-white bg-[#0284C7] rounded-xl hover:bg-[#075985] shadow-md shadow-sky-500/20 transition-all active:scale-[0.98] cursor-pointer animate-[navPulse_2.5s_infinite_ease-in-out]"
               >
                 Order Medicines Now
                 <ArrowRight size={16} />

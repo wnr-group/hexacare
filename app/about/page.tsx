@@ -428,6 +428,41 @@ export default function AboutPage() {
         </div>
       </section>
 
+      {/* ============ 2.5 CORE VALUES SECTION ============ */}
+      <section className="py-20 px-6 md:px-16 bg-white/40">
+        <div className="max-w-[1280px] mx-auto">
+          <Reveal className="text-center max-w-2xl mx-auto mb-16">
+            <span className="font-mono text-[11px] tracking-[0.3em] text-[#0284C7] uppercase font-bold block mb-3">
+              Our Core Tenets
+            </span>
+            <h2 className="font-display font-bold text-3xl md:text-5xl text-[#082F49]">
+              Core Values of HexaCare
+            </h2>
+            <p className="text-sm sm:text-base text-[#4B6584] mt-4">
+              These fundamental principles guide our daily decisions, supply chain logistics, and how we interact with patients.
+            </p>
+          </Reveal>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {values.map((val, idx) => (
+              <Reveal key={val.title} delay={idx * 100}>
+                <div className="bg-white rounded-3xl p-8 border border-sky-100 shadow-[0_10px_30px_rgba(2,132,199,0.05)] hover:shadow-lg transition-all duration-300 hover:-translate-y-1 h-full flex flex-col items-center text-center">
+                  <div className="w-16 h-16 rounded-2xl bg-[#EAF6FF] text-[#0284C7] flex items-center justify-center mb-6 shadow-sm">
+                    <val.icon size={30} />
+                  </div>
+                  <h4 className="font-display font-bold text-xl text-[#082F49] mb-3">
+                    {val.title}
+                  </h4>
+                  <p className="text-[#4B6584] text-sm leading-relaxed">
+                    {val.desc}
+                  </p>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* ============ 3. HERITAGE & ORIGIN ============ */}
       <section className="py-24 px-6 md:px-16 bg-white/40">
         <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-20 items-center">
