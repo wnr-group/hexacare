@@ -2,6 +2,7 @@
 import React, { useState } from 'react';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import ViewMedicinesModal from '@/components/products/ViewMedicinesModal';
+import OrderMedicinesModal from '@/components/products/OrderMedicinesModal';
 
 const navLinks = [
   { name: 'Home', href: '/' },
@@ -13,6 +14,7 @@ const navLinks = [
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
 
   return (
     <>
@@ -69,13 +71,20 @@ const Navbar = () => {
               ))}
             </div>
 
-            {/* Sky Blue CTA Button (Desktop) */}
-            <div className="hidden md:flex items-center ml-4">
+            {/* Sky Blue CTA Button & Order Button (Desktop) */}
+            <div className="hidden md:flex items-center gap-3 ml-4">
               <button
                 onClick={() => setIsModalOpen(true)}
-                className="group flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-sky-500 rounded-full hover:bg-sky-600 shadow-lg shadow-sky-500/25 transition-all hover:-translate-y-0.5 active:translate-y-0 cursor-pointer"
+                className="px-4 py-2 text-sm font-semibold text-slate-600 hover:text-[#0284C7] rounded-full hover:bg-white/80 transition-colors duration-200 cursor-pointer"
               >
                 Explore Products
+              </button>
+
+              <button
+                onClick={() => setIsOrderModalOpen(true)}
+                className="group flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-[#0284C7] rounded-full hover:bg-[#075985] shadow-lg shadow-sky-500/20 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer transition-all animate-[navPulse_2.5s_infinite_ease-in-out]"
+              >
+                Order Medicines Now
                 <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
@@ -110,16 +119,26 @@ const Navbar = () => {
                 {link.name}
               </a>
             ))}
-            {/* Mobile CTA */}
-            <div className="pt-4 pb-2">
+            {/* Mobile CTA Buttons */}
+            <div className="pt-4 pb-2 flex flex-col gap-2">
               <button
                 onClick={() => {
                   setIsOpen(false);
                   setIsModalOpen(true);
                 }}
-                className="flex items-center justify-center gap-2 w-full px-6 py-3.5 text-sm font-semibold text-white bg-sky-500 rounded-xl hover:bg-sky-600 shadow-md shadow-sky-500/25 transition-all active:scale-[0.98] cursor-pointer"
+                className="flex items-center justify-center gap-2 w-full px-6 py-2.5 text-sm font-semibold text-[#0284C7] bg-white border border-[#0284C7]/20 rounded-xl hover:bg-[#EAF6FF] transition-all cursor-pointer"
               >
                 Explore Products
+              </button>
+              
+              <button
+                onClick={() => {
+                  setIsOpen(false);
+                  setIsOrderModalOpen(true);
+                }}
+                className="flex items-center justify-center gap-2 w-full px-6 py-3.5 text-sm font-bold text-white bg-[#0284C7] rounded-xl hover:bg-[#075985] shadow-md shadow-sky-500/20 transition-all active:scale-[0.98] cursor-pointer"
+              >
+                Order Medicines Now
                 <ArrowRight size={16} />
               </button>
             </div>
@@ -127,8 +146,16 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Reusable ViewMedicinesModal */}
+      {/* Reusable Modals */}
       <ViewMedicinesModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
+      <OrderMedicinesModal isOpen={isOrderModalOpen} onClose={() => setIsOrderModalOpen(false)} />
+
+      <style>{`
+        @keyframes navPulse {
+          0%, 100% { box-shadow: 0 4px 14px rgba(2,132,199,0.3); }
+          50% { box-shadow: 0 4px 20px rgba(2,132,199,0.6); }
+        }
+      `}</style>
     </>
   );
 };
