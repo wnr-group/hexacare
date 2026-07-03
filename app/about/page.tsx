@@ -683,14 +683,23 @@ export default function AboutPage() {
           {/* Executive Leadership */}
           <Reveal className="mb-12">
             <h2 className="font-display font-bold text-3xl md:text-4xl text-[#082F49] mb-10">Meet Our Founders</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 max-w-3xl">
               {leadership.map((leader, i) => (
-                <div key={i} className="text-center group">
-                  <div className="w-32 h-32 mx-auto rounded-full bg-[#0284C7] text-white flex items-center justify-center font-display text-4xl font-bold mb-4 shadow-lg group-hover:-translate-y-2 transition-transform duration-300 border-4 border-white">
-                    {leader.name.charAt(0)}
+                <div key={i} className="group glass-panel rounded-3xl p-8 hover:shadow-xl transition-all duration-300 border border-sky-150 relative overflow-hidden flex flex-col items-center text-center">
+                  <div className="absolute -top-12 -right-12 w-24 h-24 bg-[#0284C7]/5 rounded-full blur-xl group-hover:bg-[#0284C7]/10 transition-colors" />
+                  
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-[#0284C7] to-[#082F49] text-white flex items-center justify-center font-display text-3xl font-bold mb-6 shadow-md border-4 border-white transition-transform duration-300 group-hover:scale-105">
+                    {leader.name.split(' ').map(n => n[0]).join('')}
                   </div>
-                  <h4 className="font-bold text-[#082F49] text-lg">{leader.name}</h4>
-                  <p className="text-[#0284C7] text-sm font-semibold">{leader.role}</p>
+                  
+                  <h4 className="font-display font-bold text-xl text-[#082F49] mb-1">{leader.name}</h4>
+                  <p className="text-[#0284C7] text-sm font-semibold tracking-wider uppercase mb-4">{leader.role}</p>
+                  
+                  <div className="w-12 border-t border-sky-100 mb-4" />
+                  
+                  <p className="text-xs text-[#4B6584] leading-relaxed">
+                    Dedicated to leading HexaCare&apos;s global operations, supply chain integrity, and clinical partnerships.
+                  </p>
                 </div>
               ))}
             </div>
