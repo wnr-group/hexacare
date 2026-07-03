@@ -22,6 +22,7 @@ import {
   Headset,
   Globe
 } from "lucide-react";
+import ProductTable, { type Product, type ProductStatus, statusStyles } from "@/components/products/ProductTable";
 
 /* ---------------------------------------------------------
    HEXACARE — MNC Products Page (Static/Informational)
@@ -307,9 +308,7 @@ const features = [
   { icon: LineChart, title: "Transparent Pricing", desc: "We bypass middlemen to offer up to 85% discounts on MRP for super specialty medicines." },
 ];
 
-// Static Information Status
-type ProductStatus = "Available" | "Limited Stock" | "Special Order";
-interface Product { name: string; category: string; indication: string; dosage: string; status: ProductStatus; info: string; }
+
 
 const allProducts: Product[] = [
   { name: "OncoTract 50mg", category: "Oncology", indication: "Targeted Therapy", dosage: "50mg Vial", status: "Special Order", info: "Contact for pricing" },
@@ -328,11 +327,7 @@ const allProducts: Product[] = [
   { name: "ImmunoSuppress", category: "Immunology", indication: "Transplant Rejection", dosage: "1mg Caps", status: "Limited Stock", info: "Ships in 48 hrs" },
 ];
 
-const statusStyles: Record<ProductStatus, string> = {
-  "Available": "bg-emerald-100 text-emerald-700",
-  "Limited Stock": "bg-amber-100 text-amber-700",
-  "Special Order": "bg-sky-100 text-sky-700",
-};
+
 
 export default function ProductPage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -498,37 +493,9 @@ export default function ProductPage() {
 
           {/* Desktop / tablet table */}
           <Reveal delay={100}>
-            <div className="hidden sm:block overflow-x-auto rounded-2xl border border-[#0284C7]/15 shadow-md bg-white">
-              <table className="w-full text-left text-sm">
-                <thead>
-                  <tr className="bg-[#082F49] text-white">
-                    {["Medicine Name", "Category", "Indication", "Dosage Format", "Availability", "Notes"].map((h) => (
-                      <th key={h} className="p-5 font-display font-bold whitespace-nowrap">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#0284C7]/10">
-                  {currentProducts.length > 0 ? currentProducts.map((p) => (
-                    <tr key={p.name} className="hover:bg-[#EAF6FF]/40 transition-colors group">
-                      <td className="p-5 whitespace-nowrap">
-                        <div className="font-bold text-[#0284C7] text-base">{p.name}</div>
-                      </td>
-                      <td className="p-5 text-[#4B6584] font-medium whitespace-nowrap">{p.category}</td>
-                      <td className="p-5 text-[#4B6584] whitespace-nowrap">{p.indication}</td>
-                      <td className="p-5 text-[#4B6584] whitespace-nowrap">{p.dosage}</td>
-                      <td className="p-5 whitespace-nowrap">
-                        <span className={`px-3 py-1.5 rounded-full text-[11px] uppercase tracking-wider font-bold ${statusStyles[p.status]}`}>{p.status}</span>
-                      </td>
-                      <td className="p-5 text-[#4B6584] font-medium whitespace-nowrap">{p.info}</td>
-                    </tr>
-                  )) : (
-                    <tr>
-                      <td colSpan={6} className="p-12 text-center text-[#4B6584]">No medicines found matching your search.</td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-
+            <div className="hidden sm:block">
+              <ProductTable products={currentProducts} />
+              
               {/* MNC Style Numbered Pagination */}
               {totalPages > 0 && (
                 <div className="p-5 border-t border-[#0284C7]/15 bg-[#F8FCFF] flex flex-col sm:flex-row items-center justify-between gap-4">
