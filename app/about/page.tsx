@@ -332,58 +332,85 @@ export default function AboutPage() {
       `}</style>
 
       {/* ============ 1. HERO SECTION (With Real Photography) ============ */}
+   {/* ============ 1. HERO SECTION (Premium Bento Layout) ============ */}
       <section className="relative pt-24 pb-20 lg:pt-32 lg:pb-28 px-6 md:px-16 overflow-hidden">
+        {/* Soft Background Glows */}
         <div className="absolute top-[-10%] right-[-5%] w-[600px] h-[600px] bg-[#22D3EE]/15 rounded-full blur-[120px] -z-10" />
         <div className="absolute bottom-[-10%] left-[-5%] w-[500px] h-[500px] bg-[#0284C7]/10 rounded-full blur-[120px] -z-10" />
 
-        <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+          
+          {/* Left Content Column */}
           <div className="order-2 lg:order-1 space-y-8">
             <Reveal>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#0284C7]/20 bg-white/60 mb-2">
+              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-[#0284C7]/20 bg-white/60 mb-2 shadow-sm">
                 <Globe2 size={16} className="text-[#0284C7]" />
                 <span className="text-xs font-bold uppercase tracking-widest text-[#0284C7]">About HexaCare</span>
               </div>
               <h1 className="editorial-title font-display font-bold text-[#082F49] mt-4">
-                Redefining access to <span className="text-[#0284C7]">specialty care.</span>
+                Redefining access to <br className="hidden md:block" /><span className="text-[#0284C7]">specialty care.</span>
               </h1>
             </Reveal>
+            
             <Reveal delay={150}>
               <p className="text-lg text-[#4B6584] leading-relaxed max-w-lg">
                 HexaCare emerged from a critical need: the disparity between advanced medical treatments and patient accessibility. As a leading specialized healthcare platform, we are dedicated to delivering vital therapies with transparency, speed, and affordability.
               </p>
             </Reveal>
+            
             <Reveal delay={300}>
-              <div className="flex items-center gap-6 pt-4">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-6 pt-4">
                 <div className="flex -space-x-4">
-                  {[1,2,3].map(i => (
-                    <div key={i} className="w-12 h-12 rounded-full border-4 border-[#EAF6FF] bg-[#0284C7] flex items-center justify-center text-white font-bold text-sm z-10 relative">
+                  {[1, 2, 3].map(i => (
+                    <div key={i} className="w-12 h-12 rounded-full border-4 border-[#EAF6FF] bg-[#0284C7] flex items-center justify-center text-white font-bold text-sm z-10 relative shadow-md">
                       <Users size={18}/>
                     </div>
                   ))}
                 </div>
                 <div>
-                  <p className="font-bold text-[#082F49]">Empowering 3 Lakh+ Patients</p>
-                  <p className="text-sm text-[#4B6584]">Across 4,000+ Indian Cities</p>
+                  <p className="font-bold text-[#082F49] text-lg">Empowering 3 Lakh+ Patients</p>
+                  <p className="text-sm text-[#4B6584] font-medium">Across 4,000+ Indian Cities</p>
                 </div>
               </div>
             </Reveal>
           </div>
 
-          <Reveal className="order-1 lg:order-2 relative h-[450px] sm:h-[550px] w-full" delay={200}>
-            <ImagePortal 
-              src="https://images.unsplash.com/photo-1586528116311-ad8c73875062?auto=format&fit=crop&w=800&q=80" 
-              alt="Cold Chain Logistics Warehouse"
-              className="absolute top-0 right-0 w-3/4 h-[75%] z-10 hover:z-30"
-            />
-            <ImagePortal 
-              src="https://images.unsplash.com/photo-1631217868264-e5b90bb7e133?auto=format&fit=crop&w=600&q=80" 
-              alt="Patient Care"
-              className="absolute bottom-0 left-0 w-3/5 h-[65%] z-20 hover:z-30"
-            />
+          {/* Right Image Column - Premium MNC Bento Grid */}
+          <Reveal className="order-1 lg:order-2 w-full h-[450px] sm:h-[550px]" delay={200}>
+            <div className="grid grid-cols-12 grid-rows-12 gap-3 sm:gap-4 w-full h-full">
+              
+              {/* Main Tall Image */}
+              <div className="col-span-7 row-span-12 rounded-[2rem] overflow-hidden border-[6px] border-white shadow-xl relative group">
+                <img 
+                  src="about_hero_image1.png" 
+                  alt="Cold Chain Logistics" 
+                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-[#0284C7]/10 mix-blend-multiply pointer-events-none" />
+              </div>
+
+              {/* Top Right Image */}
+              <div className="col-span-5 row-span-7 rounded-[2rem] overflow-hidden border-[6px] border-white shadow-xl relative group">
+                <img 
+                  src="about_hero_image2.png" 
+                  alt="Patient Care" 
+                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                />
+                <div className="absolute inset-0 bg-[#0284C7]/10 mix-blend-multiply pointer-events-none" />
+              </div>
+
+              {/* Bottom Right Premium Trust Badge */}
+              <div className="col-span-5 row-span-5 rounded-[2rem] overflow-hidden border-[6px] border-white shadow-xl bg-gradient-to-br from-[#0284C7] to-[#082F49] p-4 sm:p-5 flex flex-col justify-center text-white relative group">
+                <div className="absolute -top-10 -right-10 w-32 h-32 bg-white/20 rounded-full blur-2xl group-hover:bg-white/30 transition-all duration-500" />
+                <ShieldCheck size={28} className="text-[#22D3EE] mb-1 sm:mb-2" />
+                <span className="text-2xl sm:text-3xl font-display font-bold leading-none">100%</span>
+                <span className="text-[10px] sm:text-xs text-[#EAF6FF] mt-1 font-medium leading-snug">Genuine &<br/>Cold-Chain Secure</span>
+              </div>
+
+            </div>
           </Reveal>
         </div>
       </section>
-
       {/* ============ 2. MISSION, VISION, PURPOSE (Grid) ============ */}
       <section className="py-20 px-6 md:px-16 border-y border-[#0284C7]/15">
         <div className="max-w-[1280px] mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -439,7 +466,12 @@ export default function AboutPage() {
             <div className="relative h-[360px] sm:h-[460px] lg:h-[560px]">
               <div className="absolute inset-0 rounded-[2rem] bg-gradient-to-br from-[#0284C7]/8 to-[#22D3EE]/8" />
               <div className="relative w-full h-full rounded-[2rem] overflow-hidden border border-[#0284C7]/15 shadow-sm">
-                <HeritageGrowth />
+                {/* <HeritageGrowth /> */}
+                <img 
+                  src="about_evaluation.png" 
+                  alt="Patient Care" 
+                  className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-105"
+                />
               </div>
             </div>
           </Reveal>
