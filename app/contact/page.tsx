@@ -182,7 +182,7 @@ export default function ContactPage() {
                   </div>
                   
                   {/* Slider Content Transitions */}
-                  <div className="relative min-h-[220px] sm:min-h-[160px]">
+                  <div className="relative min-h-[280px] sm:min-h-[200px] lg:min-h-[240px]">
                     {slides.map((slide, idx) => (
                       <div
                         key={idx}
@@ -202,7 +202,7 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                <div className="mt-8 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+                <div className="mt-8 lg:mt-12 flex flex-col sm:flex-row sm:items-center justify-between gap-6">
                   {/* Action CTA */}
                   <a
                     href={slides[currentSlide].linkHref}
@@ -396,7 +396,9 @@ export default function ContactPage() {
                     return (
                       <div
                         key={i}
-                        className="border-b border-[#0284C7]/15 pb-4 transition-all"
+                        className={`pb-4 transition-all ${
+                          i === faqs.length - 1 ? "" : "border-b border-[#0284C7]/15"
+                        }`}
                       >
                         <button
                           onClick={() => setOpenFaqIndex(isOpen ? null : i)}
