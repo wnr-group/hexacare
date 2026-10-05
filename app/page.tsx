@@ -251,7 +251,7 @@ function SpecimenChamber() {
 export default function Homepage() {
   return (
     <div
-      className="min-h-screen bg-[#EAF6FF] text-[#0B2545] overflow-x-hidden"
+      className="min-h-screen bg-[#EAF6FF] text-[#0B2545] overflow-x-clip"
      
     >
       <style>{`

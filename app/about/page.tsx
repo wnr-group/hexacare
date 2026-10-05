@@ -323,7 +323,7 @@ const medicalBoard = [
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen w-full bg-[#EAF6FF] text-[#0B2545] overflow-x-hidden">
+    <div className="min-h-screen w-full bg-[#EAF6FF] text-[#0B2545] overflow-x-clip">
       <style>{`
         .editorial-title { font-size: clamp(2.5rem, 5vw, 4.5rem); line-height: 1.1; letter-spacing: -0.02em; }
         .glass-panel { background: rgba(255,255,255,0.75); backdrop-filter: blur(20px); border: 1px solid rgba(2,132,199,0.15); }

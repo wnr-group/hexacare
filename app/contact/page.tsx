@@ -154,7 +154,7 @@ export default function ContactPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#EAF6FF] text-[#0B2545] overflow-x-hidden font-sans relative">
+    <div className="min-h-screen w-full bg-[#EAF6FF] text-[#0B2545] overflow-x-clip font-sans relative">
       <style>{`
         .glass-panel { background: rgba(255,255,255,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(2,132,199,0.15); }
         .input-field { width: 100%; padding: 0.75rem 1rem; border-radius: 0.75rem; border: 1px solid rgba(2,132,199,0.2); background: white; outline: none; transition: border-color 0.2s; font-size: 0.875rem; }
