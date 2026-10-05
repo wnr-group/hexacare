@@ -262,7 +262,7 @@ export default function Homepage() {
 
       <main>
         {/* 1. HERO & SEARCH SECTION */}
-        <section className="relative px-6 md:px-16 py-16 md:py-24 overflow-hidden border-b border-[#0284C7]/15 bg-gradient-to-b from-[#CFEBFF] via-[#EAF6FF] to-[#EAF6FF]">
+        <section className="relative px-6 md:px-16 pt-28 pb-16 md:py-24 overflow-hidden border-b border-[#0284C7]/15 bg-gradient-to-b from-[#CFEBFF] via-[#EAF6FF] to-[#EAF6FF]">
           {/* ambient background glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-[#0284C7]/5 rounded-full blur-3xl -z-0" />
 
