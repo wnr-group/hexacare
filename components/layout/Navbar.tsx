@@ -1,6 +1,7 @@
 'use client'
 import React, { useState } from 'react';
 import { Menu, X, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ViewMedicinesModal from '@/components/products/ViewMedicinesModal';
 import OrderMedicinesModal from '@/components/products/OrderMedicinesModal';
@@ -65,7 +66,7 @@ const Navbar = () => {
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
                 return (
-                  <a
+                  <Link
                     key={link.name}
                     href={link.href}
                     className={`px-4 py-2 text-[16px] font-semibold rounded-full transition-all duration-200 ${
@@ -75,7 +76,7 @@ const Navbar = () => {
                     }`}
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 );
               })}
             </div>
@@ -121,7 +122,7 @@ const Navbar = () => {
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
-                <a
+                <Link
                   key={link.name}
                   href={link.href}
                   className={`block px-4 py-3 text-[16px] rounded-lg transition-colors ${
@@ -132,7 +133,7 @@ const Navbar = () => {
                   onClick={() => setIsOpen(false)}
                 >
                   {link.name}
-                </a>
+                </Link>
               );
             })}
             {/* Mobile CTA Buttons */}
