@@ -323,10 +323,8 @@ const medicalBoard = [
 
 export default function AboutPage() {
   return (
-    <div className="min-h-screen w-full bg-[#EAF6FF] text-[#0B2545] overflow-x-hidden" style={{ fontFamily: "'Inter', system-ui, sans-serif" }}>
+    <div className="min-h-screen w-full bg-[#EAF6FF] text-[#0B2545] overflow-x-hidden">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&display=swap');
-        .font-display { font-family: 'Space Grotesk', sans-serif; }
         .editorial-title { font-size: clamp(2.5rem, 5vw, 4.5rem); line-height: 1.1; letter-spacing: -0.02em; }
         .glass-panel { background: rgba(255,255,255,0.75); backdrop-filter: blur(20px); border: 1px solid rgba(2,132,199,0.15); }
       `}</style>

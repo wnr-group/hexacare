@@ -252,12 +252,9 @@ export default function Homepage() {
   return (
     <div
       className="min-h-screen bg-[#EAF6FF] text-[#0B2545] overflow-x-hidden"
-      style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+     
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
-        .font-display { font-family: 'Space Grotesk', sans-serif; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
         @keyframes scan { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         @keyframes floatSlow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
         .float-slow { animation: floatSlow 6s ease-in-out infinite; }

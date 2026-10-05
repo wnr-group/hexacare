@@ -389,9 +389,6 @@ export default function ProductPage() {
   return (
     <div className="min-h-screen w-full bg-[#EAF6FF] text-[#0B2545] overflow-x-hidden font-sans">
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
-        .font-display { font-family: 'Space Grotesk', sans-serif; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
         .glass-panel { background: rgba(255,255,255,0.7); backdrop-filter: blur(16px); border: 1px solid rgba(2,132,199,0.15); }
         @keyframes spinSlow {
           from { transform: rotate(0deg); }
