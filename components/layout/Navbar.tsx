@@ -37,16 +37,16 @@ const Navbar = () => {
               <div className="flex flex-col justify-center pt-1">
                 {/* Top Line: Brand Name + TM */}
                 <div className="flex items-start">
-                  <span className="text-2xl font-black text-[#0050D0] tracking-wide leading-none">
+                  <span className="text-2xl font-black text-[#0092E9] tracking-wide leading-none">
                     HEXACARE
                   </span>
-                  <span className="text-[9px] font-bold text-slate-800 ml-0.5 mt-0.5 leading-none">
-                    TM
+                  <span className="text-xl font-bold text-slate-800 ml-0.5 -mt-1 leading-none">
+                    ®
                   </span>
                 </div>
                 
                 {/* Middle Line: Subtitle */}
-                <span className="text-[9px] md:text-[10px] font-medium text-slate-500 tracking-[0.08em] mt-1 leading-none">
+                <span className="text-[9px] md:text-[10px] font-medium text-black tracking-[0.08em] mt-1 leading-none">
                   PHARMACEUTICALS PVT. LTD.
                 </span>
                 
@@ -54,7 +54,7 @@ const Navbar = () => {
                 <div className="w-full border-t border-slate-300 my-1"></div>
                 
                 {/* Bottom Line: Tagline */}
-                <span className="text-[8px] md:text-[9px] font-bold text-slate-600 tracking-[0.18em] leading-none">
+                <span className="text-[8px] md:text-[9px] font-bold text-black tracking-[0.18em] leading-none">
                   LIFE SAVING MEDICINE
                 </span>
               </div>
