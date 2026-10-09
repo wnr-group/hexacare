@@ -2,7 +2,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import type { Map as LeafletMap, Marker } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Check, Clock, Copy, Crosshair, Loader2, MapPin, Navigation, Pause, Phone, Play } from "lucide-react";
+import { Check, Clock, Copy, Crosshair, Loader2, MapPin, Navigation, Phone } from "lucide-react";
 import { useAutoTour } from "./useAutoTour";
 
 /* Opening hours, evaluated in India Standard Time. days: 0 = Sunday … 6 = Saturday. */
@@ -391,17 +391,6 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
           })}
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
-        <button
-          onClick={tour.toggle}
-          aria-pressed={tour.enabled}
-          className={`shrink-0 inline-flex items-center justify-center gap-2 min-h-11 px-4 rounded-full text-sm font-semibold border transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0284C7] ${
-            tour.enabled ? "bg-white text-[#082F49] border-[#0284C7]/40" : "bg-white/60 text-[#4B6584] border-[#0284C7]/20"
-          }`}
-        >
-          {tour.enabled ? <Pause size={15} /> : <Play size={15} />}
-          Auto tour: {tour.enabled ? "On" : "Off"}
-        </button>
         <button
           onClick={locate}
           disabled={geo === "locating"}
@@ -410,7 +399,6 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
           {geo === "locating" ? <Loader2 size={16} className="animate-spin" /> : <Crosshair size={16} />}
           Find my nearest branch
         </button>
-        </div>
       </div>
 
       <p role="status" aria-live="polite" className={`text-sm -mt-4 min-h-5 ${geo === "ok" ? "text-[#0284C7] font-semibold" : "text-[#4B6584]"}`}>

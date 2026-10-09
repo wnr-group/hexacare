@@ -31,7 +31,7 @@ const subscribeReduced = (cb: () => void) => {
  *   never more than one timer and the tour always continues from the last selected branch.
  * - `interrupt()` is called on every manual interaction: it stops the tour immediately and
  *   (re)starts a single idle timer; after `idleMs` without further interaction the tour resumes.
- * - Starts switched off when the visitor prefers reduced motion.
+ * - Automatic by default; stays off when the visitor prefers reduced motion.
  */
 export function useAutoTour({ ids, active, ready, onStep, stepMs = 5000, idleMs = 10000 }: Options) {
   const prefersReduced = useSyncExternalStore(
@@ -39,8 +39,7 @@ export function useAutoTour({ ids, active, ready, onStep, stepMs = 5000, idleMs 
     () => window.matchMedia(REDUCED_QUERY).matches,
     () => true // server / hydration: assume reduced so the first paint is "Off"
   );
-  const [userChoice, setUserChoice] = useState<boolean | null>(null);
-  const enabled = userChoice ?? !prefersReduced;
+  const enabled = !prefersReduced; // automatic by default; off for reduced-motion visitors
 
   const [interrupted, setInterrupted] = useState(false);
   const [hovering, setHovering] = useState(false);
@@ -68,12 +67,6 @@ export function useAutoTour({ ids, active, ready, onStep, stepMs = 5000, idleMs 
     }, idleMs);
   }, [idleMs, clearIdle]);
 
-  const toggle = useCallback(() => {
-    clearIdle();
-    setInterrupted(false);
-    setUserChoice(!enabled);
-  }, [enabled, clearIdle]);
-
   /* Page Visibility: pause while the browser tab is hidden. */
   useEffect(() => {
     const sync = () => setHidden(document.visibilityState === "hidden");
@@ -98,5 +91,5 @@ export function useAutoTour({ ids, active, ready, onStep, stepMs = 5000, idleMs 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running, active, idsKey, stepMs]);
 
-  return { enabled, running, toggle, interrupt, setHovering, setInView, stepMs };
+  return { enabled, running, interrupt, setHovering, setInView, stepMs };
 }
