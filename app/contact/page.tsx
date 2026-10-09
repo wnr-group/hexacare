@@ -79,7 +79,11 @@ const locations = [
   {
     type: "Branch Office",
     city: "Coimbatore",
-    address: "Hexacare Pharmaceuticals Pvt Ltd, No.475/2, 1st Floor, West face, Pankaja Mill road, Ramasamy nagar, Ramanathapuram, Coimbatore 641045"
+    address: "Hexacare Pharmaceuticals Pvt Ltd, No.475/2, 1st Floor, West face, Pankaja Mill road, Ramasamy nagar, Ramanathapuram, Coimbatore 641045",
+    phones: [
+      { label: "Office", number: "0422-4954112/13", dial: "04224954112" },
+      { label: "Mobile", number: "98848 45804", dial: "+919884845804" }
+    ]
   },
   {
     type: "Branch Office",
