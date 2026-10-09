@@ -1,8 +1,9 @@
 'use client'
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import type { Map as LeafletMap, Marker } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Check, Clock, Copy, Crosshair, Loader2, MapPin, Navigation, Phone } from "lucide-react";
+import { Check, Clock, Copy, Crosshair, Loader2, MapPin, Navigation, Pause, Phone, Play } from "lucide-react";
+import { useAutoTour } from "./useAutoTour";
 
 /* Opening hours, evaluated in India Standard Time. days: 0 = Sunday … 6 = Saturday. */
 export interface BranchHours {
@@ -206,10 +207,70 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
     };
   }, [userPos, mapReady]);
 
-  const selectTab = useCallback((t: string) => {
-    setTab(t);
-    setActive(t === ALL ? null : t);
+  const distances = useMemo(() => {
+    const out: Record<string, number> = {};
+    if (userPos) branches.forEach((b) => COORDS[b.city] && (out[b.city] = distanceKm(userPos, COORDS[b.city])));
+    return out;
+  }, [userPos, branches]);
+
+  const nearest = userPos ? [...branches].sort((a, b) => distances[a.city] - distances[b.city])[0] : null;
+
+  const visible = useMemo(() => {
+    const list = tab === ALL ? [...branches] : branches.filter((b) => b.city === tab);
+    return userPos ? list.sort((a, b) => distances[a.city] - distances[b.city]) : list;
+  }, [tab, branches, userPos, distances]);
+
+  /* ---- Auto tour ---- */
+  const rootRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const tourIds = useMemo(() => visible.map((b) => b.city), [visible]);
+
+  const onTourStep = useCallback((city: string) => {
+    setActive(city);
+    // Scroll only the card list itself — never move the page under the visitor.
+    const panel = panelRef.current;
+    const card = document.getElementById(`branch-card-${city}`);
+    if (panel && card && panel.scrollHeight > panel.clientHeight + 2) {
+      panel.scrollTo({ top: Math.max(0, card.offsetTop - panel.offsetTop - 8), behavior: reduced.current ? "auto" : "smooth" });
+    }
   }, []);
+
+  const tour = useAutoTour({ ids: tourIds, active, ready: mapReady, onStep: onTourStep });
+  const { interrupt, setInView, setHovering } = tour;
+
+  /* Only tour while the section is on screen. */
+  useEffect(() => {
+    const el = rootRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.25 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [setInView]);
+
+  /* Any press / key on the map (pins, controls, dragging) is a manual action. */
+  useEffect(() => {
+    const el = mapEl.current;
+    if (!el) return;
+    el.addEventListener("pointerdown", interrupt);
+    el.addEventListener("keydown", interrupt);
+    return () => {
+      el.removeEventListener("pointerdown", interrupt);
+      el.removeEventListener("keydown", interrupt);
+    };
+  }, [interrupt]);
+
+  const mouseHover = (on: boolean) => (e: PointerEvent<HTMLElement>) => {
+    if (e.pointerType === "mouse") setHovering(on);
+  };
+
+  const selectTab = useCallback(
+    (t: string) => {
+      interrupt();
+      setTab(t);
+      setActive(t === ALL ? null : t);
+    },
+    [interrupt]
+  );
 
   const tabs = [ALL, ...branches.map((b) => b.city)];
   const onTabKey = (e: KeyboardEvent<HTMLButtonElement>, i: number) => {
@@ -223,6 +284,7 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
 
   /* ---- Nearest branch ---- */
   const locate = () => {
+    interrupt();
     if (!("geolocation" in navigator)) return setGeo("unsupported");
     setGeo("locating");
     navigator.geolocation.getCurrentPosition(
@@ -238,19 +300,6 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 }
     );
   };
-
-  const distances = useMemo(() => {
-    const out: Record<string, number> = {};
-    if (userPos) branches.forEach((b) => COORDS[b.city] && (out[b.city] = distanceKm(userPos, COORDS[b.city])));
-    return out;
-  }, [userPos, branches]);
-
-  const nearest = userPos ? [...branches].sort((a, b) => distances[a.city] - distances[b.city])[0] : null;
-
-  const visible = useMemo(() => {
-    const list = tab === ALL ? [...branches] : branches.filter((b) => b.city === tab);
-    return userPos ? list.sort((a, b) => distances[a.city] - distances[b.city]) : list;
-  }, [tab, branches, userPos, distances]);
 
   const copyAddress = async (b: Branch) => {
     try {
@@ -272,10 +321,12 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
   };
 
   return (
-    <div className="space-y-8">
+    <div ref={rootRef} className="space-y-8">
       <style>{`
         @keyframes hx-flow { to { stroke-dashoffset: -20; } }
         @keyframes hx-ping { 0% { transform: scale(.7); opacity: .6; } 100% { transform: scale(2.1); opacity: 0; } }
+        @keyframes hx-tour { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+        .hx-tour-bar { animation: hx-tour 5s linear forwards; }
         @keyframes hx-card-in { from { opacity: 0; transform: translateY(18px) scale(.985); } to { opacity: 1; transform: none; } }
         @keyframes hx-beat { 0% { stroke-dashoffset: 1; } 70%,100% { stroke-dashoffset: 0; } }
         @keyframes hx-blip { 0%,100% { opacity: .25; } 50% { opacity: 1; } }
@@ -340,6 +391,17 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
           })}
         </div>
 
+        <div className="flex flex-wrap items-center gap-3">
+        <button
+          onClick={tour.toggle}
+          aria-pressed={tour.enabled}
+          className={`shrink-0 inline-flex items-center justify-center gap-2 min-h-11 px-4 rounded-full text-sm font-semibold border transition-colors cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0284C7] ${
+            tour.enabled ? "bg-white text-[#082F49] border-[#0284C7]/40" : "bg-white/60 text-[#4B6584] border-[#0284C7]/20"
+          }`}
+        >
+          {tour.enabled ? <Pause size={15} /> : <Play size={15} />}
+          Auto tour: {tour.enabled ? "On" : "Off"}
+        </button>
         <button
           onClick={locate}
           disabled={geo === "locating"}
@@ -348,6 +410,7 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
           {geo === "locating" ? <Loader2 size={16} className="animate-spin" /> : <Crosshair size={16} />}
           Find my nearest branch
         </button>
+        </div>
       </div>
 
       <p role="status" aria-live="polite" className={`text-sm -mt-4 min-h-5 ${geo === "ok" ? "text-[#0284C7] font-semibold" : "text-[#4B6584]"}`}>
@@ -365,7 +428,11 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
       </div>
 
       {/* ---- Split: map | cards ---- */}
-      <div className="grid lg:grid-cols-12 gap-6 items-start">
+      <div
+        className="grid lg:grid-cols-12 gap-6 items-start"
+        onPointerEnter={mouseHover(true)}
+        onPointerLeave={mouseHover(false)}
+      >
         <div className="lg:col-span-7 lg:sticky lg:top-28 relative rounded-[2.5rem] overflow-hidden border border-[#0284C7]/20 shadow-2xl bg-[#DCEFFB]">
           <div
             ref={mapEl}
@@ -379,12 +446,16 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
         </div>
 
         <div
+          ref={panelRef}
           id="branch-panel"
           role="tabpanel"
           aria-labelledby={`branch-tab-${tab}`}
           className="lg:col-span-5 lg:max-h-[620px] lg:overflow-y-auto lg:pr-2 space-y-4 [scrollbar-width:thin]"
         >
           <p className="sr-only" aria-live="polite">{visible.length} {visible.length === 1 ? "office" : "offices"} shown</p>
+          <p className="sr-only" role="status" aria-live="polite">
+            {active ? `Showing ${active} ${branches.find((b) => b.city === active)?.type ?? ""} on the map` : ""}
+          </p>
           {visible.map((b, idx) => {
             const isHub = b === hub;
             const isActive = active === b.city;
@@ -395,7 +466,10 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
                 key={`${tab}-${b.city}`}
                 id={`branch-card-${b.city}`}
                 aria-current={isActive}
-                onClick={() => setActive(b.city)}
+                onClick={() => {
+                  interrupt();
+                  setActive(b.city);
+                }}
                 style={{ animationDelay: `${idx * 90}ms` }}
                 className={`hx-card-in group relative rounded-[1.75rem] p-6 border cursor-pointer transition-all duration-500 hover:-translate-y-1.5 ${
                   isHub ? "bg-[#082F49] text-white" : "bg-white text-[#082F49]"
@@ -485,6 +559,11 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
                     <span aria-live="polite">{copied === b.city ? "Copied" : "Copy Address"}</span>
                   </button>
                 </div>
+                {tour.running && isActive && (
+                  <span aria-hidden="true" className="absolute left-6 right-6 bottom-0 h-[3px] rounded-full bg-[#22D3EE]/20 overflow-hidden">
+                    <span key={active} className="hx-tour-bar block h-full origin-left bg-[#22D3EE]" style={{ animationDuration: `${tour.stepMs}ms` }} />
+                  </span>
+                )}
               </article>
             );
           })}
