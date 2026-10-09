@@ -1,6 +1,7 @@
 'use client'
 import React, { useState, useEffect } from 'react';
 import { X, Search, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
+import Link from 'next/link';
 import ProductTable, { Product } from './ProductTable';
 
 interface ViewMedicinesModalProps {
@@ -55,13 +56,13 @@ export default function ViewMedicinesModal({
             </p>
           </div>
           <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto shrink-0">
-            <a
+            <Link
               href="/product"
               onClick={onClose}
               className="text-xs sm:text-sm font-semibold text-[#0284C7] hover:text-[#075985] flex items-center gap-1 bg-[#EAF6FF] px-3 py-2 rounded-full border border-sky-200 transition-colors"
             >
               Go to Products Page <ExternalLink size={14} />
-            </a>
+            </Link>
             <button
               onClick={onClose}
               className="p-2 rounded-full hover:bg-slate-100 text-[#4B6584] hover:text-[#082F49] transition-colors cursor-pointer"
@@ -152,13 +153,13 @@ export default function ViewMedicinesModal({
           <span className="text-[#4B6584] font-medium text-center sm:text-left">
             Can&apos;t find a specific medicine? Submit a sourcing request directly.
           </span>
-          <a
+          <Link
             href="/product#medName"
             onClick={onClose}
             className="w-full sm:w-auto text-center bg-[#0284C7] text-white px-5 py-2.5 rounded-full font-bold hover:bg-[#075985] transition-colors shadow-sm whitespace-nowrap"
           >
             Request Medicines
-          </a>
+          </Link>
         </div>
       </div>
 

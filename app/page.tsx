@@ -251,13 +251,10 @@ function SpecimenChamber() {
 export default function Homepage() {
   return (
     <div
-      className="min-h-screen bg-[#EAF6FF] text-[#0B2545] overflow-x-hidden"
-      style={{ fontFamily: "'Inter', system-ui, sans-serif" }}
+      className="min-h-screen bg-[#EAF6FF] text-[#0B2545] overflow-x-clip"
+     
     >
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
-        .font-display { font-family: 'Space Grotesk', sans-serif; }
-        .font-mono { font-family: 'JetBrains Mono', monospace; }
         @keyframes scan { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         @keyframes floatSlow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
         .float-slow { animation: floatSlow 6s ease-in-out infinite; }
@@ -265,7 +262,7 @@ export default function Homepage() {
 
       <main>
         {/* 1. HERO & SEARCH SECTION */}
-        <section className="relative px-6 md:px-16 py-16 md:py-24 overflow-hidden border-b border-[#0284C7]/15 bg-gradient-to-b from-[#CFEBFF] via-[#EAF6FF] to-[#EAF6FF]">
+        <section className="relative px-6 md:px-16 pt-28 pb-16 md:py-24 overflow-hidden border-b border-[#0284C7]/15 bg-gradient-to-b from-[#CFEBFF] via-[#EAF6FF] to-[#EAF6FF]">
           {/* ambient background glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-[#0284C7]/5 rounded-full blur-3xl -z-0" />
 
