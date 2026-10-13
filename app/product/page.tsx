@@ -348,11 +348,6 @@ export default function ProductPage() {
   const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
   const currentProducts = filteredProducts.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
 
-  // Reset to page 1 when filters change
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchQuery, activeCategory]);
-
   const scrollToCatalogue = () => {
     document.getElementById('catalogue')?.scrollIntoView({ behavior: 'smooth' });
   };
@@ -465,7 +460,7 @@ export default function ProductPage() {
               <input
                 type="text"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
                 placeholder="Search medicines or conditions..."
                 className="w-full pl-11 pr-4 py-3 rounded-full border border-[#0284C7]/20 bg-white focus:outline-none focus:border-[#0284C7] shadow-sm transition-colors text-sm"
               />
@@ -479,7 +474,7 @@ export default function ProductPage() {
               {categories.map(cat => (
                 <button
                   key={cat}
-                  onClick={() => setActiveCategory(cat)}
+                  onClick={() => { setActiveCategory(cat); setCurrentPage(1); }}
                   className={`px-4 py-2 rounded-full whitespace-nowrap text-sm font-semibold border transition-all ${activeCategory === cat ? 'bg-[#0284C7] text-white border-[#0284C7] shadow-md' : 'bg-white text-[#4B6584] border-[#0284C7]/20 hover:bg-[#EAF6FF]'}`}
                 >
                   {cat}

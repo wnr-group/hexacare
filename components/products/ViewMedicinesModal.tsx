@@ -1,5 +1,5 @@
 'use client'
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { X, Search, ChevronLeft, ChevronRight, ExternalLink } from 'lucide-react';
 import Link from 'next/link';
 import ProductTable, { Product } from './ProductTable';
@@ -34,11 +34,6 @@ export default function ViewMedicinesModal({
 
   const modalTotalPages = Math.ceil(modalFilteredProducts.length / modalItemsPerPage);
   const modalCurrentProducts = modalFilteredProducts.slice((modalCurrentPage - 1) * modalItemsPerPage, modalCurrentPage * modalItemsPerPage);
-
-  // Reset page when filter changes
-  useEffect(() => {
-    setModalCurrentPage(1);
-  }, [modalSearchQuery, modalActiveCategory]);
 
   if (!isOpen) return null;
 
@@ -83,7 +78,7 @@ export default function ViewMedicinesModal({
               <input
                 type="text"
                 value={modalSearchQuery}
-                onChange={(e) => setModalSearchQuery(e.target.value)}
+                onChange={(e) => { setModalSearchQuery(e.target.value); setModalCurrentPage(1); }}
                 placeholder="Search medicine or condition..."
                 className="w-full pl-11 pr-4 py-2.5 rounded-full border border-[#0284C7]/20 bg-white focus:outline-none focus:border-[#0284C7] shadow-sm transition-colors text-sm text-[#082F49]"
               />
@@ -93,7 +88,7 @@ export default function ViewMedicinesModal({
               {modalCategories.map(cat => (
                 <button
                   key={cat}
-                  onClick={() => setModalActiveCategory(cat)}
+                  onClick={() => { setModalActiveCategory(cat); setModalCurrentPage(1); }}
                   className={`px-3 py-1.5 rounded-full whitespace-nowrap text-xs font-semibold border transition-all cursor-pointer ${modalActiveCategory === cat ? 'bg-[#0284C7] text-white border-[#0284C7] shadow-sm' : 'bg-white text-[#4B6584] border-[#0284C7]/20 hover:bg-[#EAF6FF]'}`}
                 >
                   {cat}

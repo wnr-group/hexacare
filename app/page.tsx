@@ -652,7 +652,7 @@ export default function Homepage() {
                   Trusted by thousands across India
                 </h2>
                 <p className="text-[#9DC8E6] text-lg">
-                  Real experiences from patients whose lives we've impacted.
+                  Real experiences from patients whose lives we&apos;ve impacted.
                 </p>
               </div>
 
@@ -687,7 +687,7 @@ export default function Homepage() {
                       )}
                     </div>
                     <p className="text-[#EAF6FF] text-[15px] leading-relaxed mb-6">
-                      "{rev.review}"
+                      &ldquo;{rev.review}&rdquo;
                     </p>
                     <div className="flex items-center gap-3 mt-auto">
                       <div className="w-10 h-10 rounded-full bg-[#0284C7] flex items-center justify-center font-bold text-sm">
