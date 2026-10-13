@@ -143,7 +143,7 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
     });
     if (active && COORDS[active]) {
       if (reduced.current) map.setView(COORDS[active], 11);
-      else map.flyTo(COORDS[active], 11, { duration: 1.4 });
+      else map.flyTo(COORDS[active], 11, { duration: 1 });
     } else {
       const bounds = L.latLngBounds(Object.values(COORDS));
       if (userPos) bounds.extend(userPos);
@@ -282,7 +282,7 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
         @keyframes hx-flow { to { stroke-dashoffset: -20; } }
         @keyframes hx-ping { 0% { transform: scale(.7); opacity: .6; } 100% { transform: scale(2.1); opacity: 0; } }
         @keyframes hx-tour { from { transform: scaleX(0); } to { transform: scaleX(1); } }
-        .hx-tour-bar { animation: hx-tour 5s linear forwards; }
+        .hx-tour-bar { animation: hx-tour 3s linear forwards; }
         @keyframes hx-card-in { from { opacity: 0; transform: translateY(18px) scale(.985); } to { opacity: 1; transform: none; } }
         @keyframes hx-beat { 0% { stroke-dashoffset: 1; } 70%,100% { stroke-dashoffset: 0; } }
         @keyframes hx-blip { 0%,100% { opacity: .25; } 50% { opacity: 1; } }

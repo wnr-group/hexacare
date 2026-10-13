@@ -33,7 +33,7 @@ const subscribeReduced = (cb: () => void) => {
  *   (re)starts a single idle timer; after `idleMs` without further interaction the tour resumes.
  * - Automatic by default; stays off when the visitor prefers reduced motion.
  */
-export function useAutoTour({ ids, active, ready, onStep, stepMs = 5000, idleMs = 10000 }: Options) {
+export function useAutoTour({ ids, active, ready, onStep, stepMs = 3000, idleMs = 10000 }: Options) {
   const prefersReduced = useSyncExternalStore(
     subscribeReduced,
     () => window.matchMedia(REDUCED_QUERY).matches,
@@ -84,7 +84,7 @@ export function useAutoTour({ ids, active, ready, onStep, stepMs = 5000, idleMs 
     if (!running) return;
     const idx = active ? ids.indexOf(active) : -1;
     // Nothing selected yet → start with the first branch after a short beat.
-    const delay = idx === -1 ? 1200 : stepMs;
+    const delay = idx === -1 ? 800 : stepMs;
     const t = setTimeout(() => onStepRef.current(ids[(idx + 1) % ids.length]), delay);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
