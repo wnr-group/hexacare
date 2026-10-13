@@ -169,6 +169,7 @@ const capabilities = [
 
 export default function ContactPage() {
   const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success">("idle");
+  const [submitError, setSubmitError] = useState("");
   const [inquiryType, setInquiryType] = useState("");
   const [inquiryError, setInquiryError] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -188,13 +189,27 @@ export default function ContactPage() {
     setIsAutoplay(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    const form = e.currentTarget;
+    const data = Object.fromEntries(new FormData(form));
     setFormStatus("submitting");
-    // Simulate API call
-    setTimeout(() => {
+    setSubmitError("");
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || "We couldn't send your message. Please try again.");
+      }
       setFormStatus("success");
-    }, 1500);
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "We couldn't send your message. Please try again.");
+      setFormStatus("idle");
+    }
   };
 
   const slide = slides[currentSlide];
@@ -434,17 +449,17 @@ export default function ContactPage() {
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-7">
                       <div>
                         <label htmlFor="c-name" className="font-mono text-[10px] tracking-[0.2em] uppercase font-bold text-[#0284C7]">Full Name</label>
-                        <input id="c-name" type="text" required autoComplete="name" className="field" placeholder="John Doe" />
+                        <input id="c-name" name="name" type="text" required autoComplete="name" className="field" placeholder="John Doe" />
                       </div>
                       <div>
                         <label htmlFor="c-phone" className="font-mono text-[10px] tracking-[0.2em] uppercase font-bold text-[#0284C7]">Phone Number</label>
-                        <input id="c-phone" type="tel" required autoComplete="tel" className="field" placeholder="+91" />
+                        <input id="c-phone" name="phone" type="tel" required autoComplete="tel" className="field" placeholder="+91" />
                       </div>
                     </div>
 
                     <div>
                       <label htmlFor="c-email" className="font-mono text-[10px] tracking-[0.2em] uppercase font-bold text-[#0284C7]">Email Address</label>
-                      <input id="c-email" type="email" required autoComplete="email" className="field" placeholder="john@example.com" />
+                      <input id="c-email" name="email" type="email" required autoComplete="email" className="field" placeholder="john@example.com" />
                     </div>
 
                     <fieldset>
@@ -473,15 +488,17 @@ export default function ContactPage() {
 
                     <div>
                       <label htmlFor="c-msg" className="font-mono text-[10px] tracking-[0.2em] uppercase font-bold text-[#0284C7]">Message Details</label>
-                      <textarea id="c-msg" required rows={4} className="field resize-none" placeholder="Please provide details about your prescription or inquiry..." />
+                      <textarea id="c-msg" name="message" required rows={4} className="field resize-none" placeholder="Please provide details about your prescription or inquiry..." />
                     </div>
+
+                    {submitError && <p role="alert" className="text-sm font-medium text-red-600">{submitError}</p>}
 
                     <button
                       type="submit"
                       disabled={formStatus === "submitting"}
                       className="btn-shine group w-full sm:w-auto inline-flex items-center justify-center gap-4 bg-[#082F49] text-white pl-8 pr-3 py-3 rounded-full font-bold hover:bg-[#0284C7] transition-colors disabled:opacity-70 cursor-pointer"
                     >
-                      {formStatus === "submitting" ? "Encrypting & Sending..." : "Submit Inquiry"}
+                      {formStatus === "submitting" ? "Sending..." : "Submit Inquiry"}
                       <span className="w-10 h-10 rounded-full bg-[#22D3EE] text-[#041B2D] flex items-center justify-center group-hover:rotate-45 transition-transform duration-300"><ArrowRight size={18} /></span>
                     </button>
                   </form>

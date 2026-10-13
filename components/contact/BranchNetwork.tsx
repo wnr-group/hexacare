@@ -23,6 +23,13 @@ const COORDS: Record<string, [number, number]> = {
 
 const ALL = "all";
 
+/* Tiles: set NEXT_PUBLIC_MAP_TILE_URL (e.g. a MapTiler/Stadia URL with its key) for production.
+   Falls back to OSM's public server, which is for light use only. */
+const TILE_URL = process.env.NEXT_PUBLIC_MAP_TILE_URL || "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png";
+const TILE_ATTRIBUTION =
+  process.env.NEXT_PUBLIC_MAP_TILE_ATTRIBUTION ||
+  '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';;
+
 function distanceKm(a: [number, number], b: [number, number]) {
   const rad = (x: number) => (x * Math.PI) / 180;
   const dLat = rad(b[0] - a[0]);
@@ -80,10 +87,7 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
         attributionControl: true,
       });
       L.control.zoom({ position: "bottomright" }).addTo(map);
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 18,
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-      }).addTo(map);
+      L.tileLayer(TILE_URL, { maxZoom: 18, attribution: TILE_ATTRIBUTION }).addTo(map);
 
       mapRef.current = map;
       setMapReady(true);
