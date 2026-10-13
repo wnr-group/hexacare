@@ -52,11 +52,11 @@ const Footer = () => {
               />
               <div className="flex flex-col justify-center pt-1">
                 <div className="flex items-start">
-                  <span className="text-2xl font-black text-white tracking-wide leading-none">
+                  <span className="text-2xl font-black text-[#0092E9] tracking-wide leading-none">
                     HEXACARE
                   </span>
-                  <span className="text-[9px] font-bold text-sky-400 ml-0.5 mt-0.5 leading-none">
-                    TM
+                  <span className="text-xl font-bold text-sky-400 ml-0.5 -mt-1 leading-none">
+                    ®
                   </span>
                 </div>
                 <span className="text-[9px] md:text-[10px] font-medium text-slate-400 tracking-[0.08em] mt-1 leading-none">

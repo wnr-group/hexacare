@@ -1,6 +1,7 @@
 'use client'
 import React, { useState } from 'react';
 import { Menu, X, ArrowRight } from 'lucide-react';
+import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import ViewMedicinesModal from '@/components/products/ViewMedicinesModal';
 import OrderMedicinesModal from '@/components/products/OrderMedicinesModal';
@@ -37,16 +38,16 @@ const Navbar = () => {
               <div className="flex flex-col justify-center pt-1">
                 {/* Top Line: Brand Name + TM */}
                 <div className="flex items-start">
-                  <span className="text-2xl font-black text-[#0050D0] tracking-wide leading-none">
+                  <span className="text-2xl font-black text-[#0092E9] tracking-wide leading-none">
                     HEXACARE
                   </span>
-                  <span className="text-[9px] font-bold text-slate-800 ml-0.5 mt-0.5 leading-none">
-                    TM
+                  <span className="text-xl font-bold text-slate-800 ml-0.5 -mt-1 leading-none">
+                    ®
                   </span>
                 </div>
                 
                 {/* Middle Line: Subtitle */}
-                <span className="text-[9px] md:text-[10px] font-medium text-slate-500 tracking-[0.08em] mt-1 leading-none">
+                <span className="text-[9px] md:text-[10px] font-medium text-black tracking-[0.08em] mt-1 leading-none">
                   PHARMACEUTICALS PVT. LTD.
                 </span>
                 
@@ -54,18 +55,18 @@ const Navbar = () => {
                 <div className="w-full border-t border-slate-300 my-1"></div>
                 
                 {/* Bottom Line: Tagline */}
-                <span className="text-[8px] md:text-[9px] font-bold text-slate-600 tracking-[0.18em] leading-none">
+                <span className="text-[8px] md:text-[9px] font-bold text-black tracking-[0.18em] leading-none">
                   LIFE SAVING MEDICINE
                 </span>
               </div>
             </div>
 
             {/* Desktop Menu */}
-            <div className="hidden md:flex space-x-1 lg:space-x-2 items-center">
+            <div className="hidden lg:flex space-x-1 lg:space-x-2 items-center">
               {navLinks.map((link) => {
                 const isActive = pathname === link.href;
                 return (
-                  <a
+                  <Link
                     key={link.name}
                     href={link.href}
                     className={`px-4 py-2 text-[16px] font-semibold rounded-full transition-all duration-200 ${
@@ -75,13 +76,13 @@ const Navbar = () => {
                     }`}
                   >
                     {link.name}
-                  </a>
+                  </Link>
                 );
               })}
             </div>
 
             {/* Highlighted Explore Products & Pulsing Order Button (Desktop) */}
-            <div className="hidden md:flex items-center gap-3 ml-4">
+            <div className="hidden lg:flex items-center gap-3 ml-4">
               <button
                 onClick={() => setIsModalOpen(true)}
                 className="group flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold text-[#0284C7] bg-[#EAF6FF] hover:bg-[#0284C7] hover:text-white border border-[#0284C7]/30 rounded-full transition-all duration-300 shadow-sm cursor-pointer hover:shadow-md active:scale-95"
@@ -99,7 +100,7 @@ const Navbar = () => {
             </div>
 
             {/* Mobile Menu Toggle */}
-            <div className="md:hidden flex items-center">
+            <div className="lg:hidden flex items-center">
               <button 
                 onClick={() => setIsOpen(!isOpen)}
                 className="text-slate-600 hover:text-sky-600 p-2 rounded-full bg-white shadow-sm border border-sky-100 transition-colors focus:outline-none focus:ring-2 focus:ring-sky-500/20"
@@ -113,7 +114,7 @@ const Navbar = () => {
 
         {/* Mobile Menu Drawer */}
         <div 
-          className={`md:hidden absolute top-full left-0 w-full bg-sky-50/95 backdrop-blur-xl border-b border-sky-100 shadow-2xl transition-all duration-300 ease-in-out origin-top ${
+          className={`lg:hidden absolute top-full left-0 w-full bg-sky-50/95 backdrop-blur-xl border-b border-sky-100 shadow-2xl transition-all duration-300 ease-in-out origin-top ${
             isOpen ? 'opacity-100 scale-y-100 visible' : 'opacity-0 scale-y-95 invisible'
           }`}
         >
@@ -121,7 +122,7 @@ const Navbar = () => {
             {navLinks.map((link) => {
               const isActive = pathname === link.href;
               return (
-                <a
+                <Link
                   key={link.name}
                   href={link.href}
                   className={`block px-4 py-3 text-[16px] rounded-lg transition-colors ${
@@ -132,7 +133,7 @@ const Navbar = () => {
                   onClick={() => setIsOpen(false)}
                 >
                   {link.name}
-                </a>
+                </Link>
               );
             })}
             {/* Mobile CTA Buttons */}
