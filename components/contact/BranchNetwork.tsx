@@ -85,24 +85,6 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
       }).addTo(map);
 
-      const hubLL = COORDS[hub.city];
-      branches.forEach((b) => {
-        const ll = COORDS[b.city];
-        if (!ll) return;
-        if (b !== hub && hubLL) {
-          L.polyline([hubLL, ll], { color: "#0284C7", weight: 1.5, opacity: 0.55, dashArray: "2 8", className: "hx-route" }).addTo(map);
-        }
-        const m = L.marker(ll, {
-          icon: L.divIcon({ className: "hx-pin-wrap", html: pinHtml(b === hub, false), iconSize: [44, 44], iconAnchor: [22, 22] }),
-          title: `${b.city} ${b.type}`,
-          keyboard: true,
-          alt: `${b.city} ${b.type}`,
-        }).addTo(map);
-        m.on("click", () => onPin(b.city));
-        markers.current[b.city] = m;
-      });
-
-      map.fitBounds(L.latLngBounds(Object.values(COORDS)), { padding: [40, 40] });
       mapRef.current = map;
       setMapReady(true);
     })();
@@ -113,8 +95,37 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
       markers.current = {};
       setMapReady(false);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onPin]);
+  }, []);
+
+  /* Pins and routes follow `branches`, so the map updates if the data ever changes. */
+  useEffect(() => {
+    const L = leaflet.current;
+    const map = mapRef.current;
+    if (!mapReady || !L || !map) return;
+
+    const layer = L.layerGroup().addTo(map);
+    const hubLL = COORDS[hub.city];
+    branches.forEach((b) => {
+      const ll = COORDS[b.city];
+      if (!ll) return;
+      if (b !== hub && hubLL) {
+        L.polyline([hubLL, ll], { color: "#0284C7", weight: 1.5, opacity: 0.55, dashArray: "2 8", className: "hx-route" }).addTo(layer);
+      }
+      const m = L.marker(ll, {
+        icon: L.divIcon({ className: "hx-pin-wrap", html: pinHtml(b === hub, false), iconSize: [44, 44], iconAnchor: [22, 22] }),
+        title: `${b.city} ${b.type}`,
+        keyboard: true,
+        alt: `${b.city} ${b.type}`,
+      }).addTo(layer);
+      m.on("click", () => onPin(b.city));
+      markers.current[b.city] = m;
+    });
+
+    return () => {
+      layer.remove();
+      markers.current = {};
+    };
+  }, [mapReady, branches, hub, onPin]);
 
   /* Highlight the active pin and fly to it. */
   useEffect(() => {
@@ -134,8 +145,7 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
       if (userPos) bounds.extend(userPos);
       map.fitBounds(bounds, { padding: [40, 40], animate: !reduced.current });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [active, mapReady]);
+  }, [active, mapReady, branches, hub, userPos]);
 
   /* Show the visitor's own position on the map. */
   useEffect(() => {
