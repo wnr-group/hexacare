@@ -1,5 +1,5 @@
 'use client'
-import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import type { Map as LeafletMap, Marker } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { Check, Copy, Crosshair, Loader2, MapPin, Navigation, Phone } from "lucide-react";
@@ -195,7 +195,7 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
   }, []);
 
   const tour = useAutoTour({ ids: tourIds, active, ready: mapReady, onStep: onTourStep });
-  const { interrupt, setInView, setHovering } = tour;
+  const { interrupt, setInView } = tour;
 
   /* Only tour while the section is on screen. */
   useEffect(() => {
@@ -217,10 +217,6 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
       el.removeEventListener("keydown", interrupt);
     };
   }, [interrupt]);
-
-  const mouseHover = (on: boolean) => (e: PointerEvent<HTMLElement>) => {
-    if (e.pointerType === "mouse") setHovering(on);
-  };
 
   const selectTab = useCallback(
     (t: string) => {
@@ -378,12 +374,7 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
       {/* ---- Split: map | cards ---- */}
       <div
         className="grid lg:grid-cols-12 gap-6 items-start"
-        onPointerEnter={mouseHover(true)}
-        onPointerLeave={mouseHover(false)}
-        onPointerDown={(e) => {
-          // Touch / pen have no hover, so any press (including starting a scroll) pauses the tour.
-          if (e.pointerType !== "mouse") interrupt();
-        }}
+        onPointerDown={interrupt}
       >
         <div className="lg:col-span-7 lg:sticky lg:top-28 relative rounded-[2.5rem] overflow-hidden border border-[#0284C7]/20 shadow-2xl bg-[#DCEFFB]">
           <div

@@ -24,7 +24,7 @@ const subscribeReduced = (cb: () => void) => {
 /**
  * Guided tour over a list of ids.
  *
- * running = ready && switched on && not interrupted && not hovered && in view && tab visible && 2+ ids
+ * running = ready && switched on && not interrupted && in view && tab visible && 2+ ids
  *
  * - While `running`, one timer waits `stepMs`, then calls `onStep(next)`. Selecting a branch
  *   (by the tour or by the visitor) changes `active`, which re-arms the timer, so there is
@@ -42,7 +42,6 @@ export function useAutoTour({ ids, active, ready, onStep, stepMs = 5000, idleMs 
   const enabled = !prefersReduced; // automatic by default; off for reduced-motion visitors
 
   const [interrupted, setInterrupted] = useState(false);
-  const [hovering, setHovering] = useState(false);
   const [inView, setInView] = useState(false);
   const [hidden, setHidden] = useState(false);
 
@@ -79,7 +78,7 @@ export function useAutoTour({ ids, active, ready, onStep, stepMs = 5000, idleMs 
   useEffect(() => clearIdle, [clearIdle]);
 
   const idsKey = ids.join("|");
-  const running = ready && enabled && !interrupted && !hovering && inView && !hidden && ids.length > 1;
+  const running = ready && enabled && !interrupted && inView && !hidden && ids.length > 1;
 
   useEffect(() => {
     if (!running) return;
@@ -91,5 +90,5 @@ export function useAutoTour({ ids, active, ready, onStep, stepMs = 5000, idleMs 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [running, active, idsKey, stepMs]);
 
-  return { enabled, running, interrupt, setHovering, setInView, stepMs };
+  return { enabled, running, interrupt, setInView, stepMs };
 }
