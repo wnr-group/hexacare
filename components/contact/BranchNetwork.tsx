@@ -366,6 +366,10 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
         className="grid lg:grid-cols-12 gap-6 items-start"
         onPointerEnter={mouseHover(true)}
         onPointerLeave={mouseHover(false)}
+        onPointerDown={(e) => {
+          // Touch / pen have no hover, so any press (including starting a scroll) pauses the tour.
+          if (e.pointerType !== "mouse") interrupt();
+        }}
       >
         <div className="lg:col-span-7 lg:sticky lg:top-28 relative rounded-[2.5rem] overflow-hidden border border-[#0284C7]/20 shadow-2xl bg-[#DCEFFB]">
           <div
