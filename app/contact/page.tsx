@@ -170,6 +170,7 @@ const capabilities = [
 export default function ContactPage() {
   const [formStatus, setFormStatus] = useState<"idle" | "submitting" | "success">("idle");
   const [inquiryType, setInquiryType] = useState("");
+  const [inquiryError, setInquiryError] = useState(false);
   const [currentSlide, setCurrentSlide] = useState(0);
   const [isAutoplay, setIsAutoplay] = useState(true);
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(0);
@@ -261,6 +262,7 @@ export default function ContactPage() {
             </div>
 
             {/* Stacked slides share one grid cell, so height always fits the longest */}
+            <h1 className="sr-only">Contact HexaCare</h1>
             <div className="grid">
               {slides.map((s, idx) => {
                 const [lead] = s.title.split(s.accent);
@@ -270,14 +272,7 @@ export default function ContactPage() {
                     aria-hidden={idx !== currentSlide}
                     className={`col-start-1 row-start-1 transition-all duration-700 ${idx === currentSlide ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6 pointer-events-none"}`}
                   >
-                    {idx === currentSlide ? (
-                      <h1 className="font-display font-extrabold text-[2.5rem] sm:text-5xl lg:text-[3.6rem] leading-[1.06] tracking-[-0.02em]">
-                        {lead}
-                        <span className="text-shine">{s.accent}</span>
-                      </h1>
-                    ) : (
-                      <p className="font-display font-extrabold text-[2.5rem] sm:text-5xl lg:text-[3.6rem] leading-[1.06] tracking-[-0.02em]">{s.title}</p>
-                    )}
+                    <p className="font-display font-extrabold text-[2.5rem] sm:text-5xl lg:text-[3.6rem] leading-[1.06] tracking-[-0.02em]">{lead}<span className="text-shine">{s.accent}</span></p>
                     <p className="mt-6 text-base sm:text-lg text-[#9DC8E6] leading-relaxed max-w-xl">{s.description}</p>
                   </div>
                 );
@@ -419,12 +414,12 @@ export default function ContactPage() {
                   <Eyebrow>Secure Inquiry</Eyebrow>
                   <span className="inline-flex items-center gap-2 text-[#0284C7] bg-[#0284C7]/10 px-3 py-1.5 rounded-full">
                     <Lock size={13} />
-                    <span className="font-mono text-[10px] tracking-widest font-bold">ENCRYPTED</span>
+                    <span className="font-mono text-[10px] tracking-widest font-bold">CONFIDENTIAL</span>
                   </span>
                 </div>
 
                 <h2 className="relative font-display font-extrabold text-3xl sm:text-4xl text-[#082F49] tracking-tight mb-3">Tell us how we can help.</h2>
-                <p className="relative text-[#4B6584] text-sm leading-relaxed mb-10 max-w-lg">Your medical data and personal details are encrypted and kept strictly confidential. We never share patient information.</p>
+                <p className="relative text-[#4B6584] text-sm leading-relaxed mb-10 max-w-lg">We treat your medical data and personal details as confidential and never share patient information.</p>
 
                 {formStatus === "success" ? (
                   <div className="relative bg-emerald-50 border border-emerald-200 p-10 rounded-3xl text-center animate-[fadeUp_.6s_ease-out]">
@@ -463,7 +458,8 @@ export default function ContactPage() {
                               value={d.value}
                               required={i === 0}
                               checked={inquiryType === d.value}
-                              onChange={(e) => setInquiryType(e.target.value)}
+                              onChange={(e) => { setInquiryType(e.target.value); setInquiryError(false); }}
+                              onInvalid={() => setInquiryError(true)}
                               className="peer sr-only"
                             />
                             <span className="block px-4 py-2.5 rounded-full border border-[#082F49]/15 text-sm font-medium text-[#4B6584] bg-white transition-all hover:border-[#0284C7]/50 peer-checked:bg-[#082F49] peer-checked:text-white peer-checked:border-[#082F49] peer-checked:shadow-lg peer-focus-visible:outline-2 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-[#0284C7]">
@@ -472,6 +468,7 @@ export default function ContactPage() {
                           </label>
                         ))}
                       </div>
+                      {inquiryError && <p role="alert" className="mt-2 text-sm font-medium text-red-600">Please choose a subject of inquiry.</p>}
                     </fieldset>
 
                     <div>

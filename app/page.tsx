@@ -252,7 +252,6 @@ export default function Homepage() {
   return (
     <div
       className="min-h-screen bg-[#EAF6FF] text-[#0B2545] overflow-x-clip"
-     
     >
       <style>{`
         @keyframes scan { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }

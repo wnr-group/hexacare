@@ -2,24 +2,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent, type PointerEvent } from "react";
 import type { Map as LeafletMap, Marker } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Check, Clock, Copy, Crosshair, Loader2, MapPin, Navigation, Phone } from "lucide-react";
+import { Check, Copy, Crosshair, Loader2, MapPin, Navigation, Phone } from "lucide-react";
 import { useAutoTour } from "./useAutoTour";
-
-/* Opening hours, evaluated in India Standard Time. days: 0 = Sunday … 6 = Saturday. */
-export interface BranchHours {
-  days: number[];
-  open: string; // "HH:MM" 24h
-  close: string;
-  label: string; // human readable, e.g. "Mon–Sat · 9:30 AM – 6:00 PM"
-}
 
 export interface Branch {
   type: string;
   city: string;
   address: string;
   phones?: { label: string; number: string; dial?: string }[]; // dial: digits for tel:, defaults to number
-  hours?: BranchHours;
-  services?: string[];
 }
 
 /* Approximate neighbourhood centres, used for map pins and distance. */
@@ -32,46 +22,6 @@ const COORDS: Record<string, [number, number]> = {
 };
 
 const ALL = "all";
-const DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-const toMinutes = (t: string) => {
-  const [h, m] = t.split(":").map(Number);
-  return h * 60 + m;
-};
-const fmtTime = (t: string) => {
-  const [h, m] = t.split(":").map(Number);
-  return `${h % 12 || 12}${m ? `:${String(m).padStart(2, "0")}` : ""} ${h < 12 ? "AM" : "PM"}`;
-};
-
-/* Opening state in IST: open now (+ closing time), or when it next opens. */
-function hoursStatus(hours: BranchHours, now: Date) {
-  const parts = new Intl.DateTimeFormat("en-US", {
-    timeZone: "Asia/Kolkata",
-    weekday: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-    hourCycle: "h23",
-  }).formatToParts(now);
-  const get = (t: string) => parts.find((p) => p.type === t)?.value ?? "";
-  const day = DAYS.indexOf(get("weekday"));
-  const mins = Number(get("hour")) * 60 + Number(get("minute"));
-  const open = toMinutes(hours.open);
-  const close = toMinutes(hours.close);
-
-  if (hours.days.includes(day) && mins >= open && mins < close) {
-    return { open: true, text: `Open now · Closes ${fmtTime(hours.close)}` };
-  }
-  if (hours.days.includes(day) && mins < open) {
-    return { open: false, text: `Closed · Opens ${fmtTime(hours.open)}` };
-  }
-  for (let i = 1; i <= 7; i++) {
-    const d = (day + i) % 7;
-    if (hours.days.includes(d)) {
-      return { open: false, text: `Closed · Opens ${i === 1 ? "tomorrow" : DAYS[d]} ${fmtTime(hours.open)}` };
-    }
-  }
-  return { open: false, text: "Closed" };
-}
 
 function distanceKm(a: [number, number], b: [number, number]) {
   const rad = (x: number) => (x * Math.PI) / 180;
@@ -90,7 +40,6 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
   const hub = branches[0];
   const [tab, setTab] = useState<string>(ALL);
   const [active, setActive] = useState<string | null>(null);
-  const [now, setNow] = useState<Date | null>(null);
   const [geo, setGeo] = useState<GeoState>("idle");
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
@@ -102,13 +51,9 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
   const [mapReady, setMapReady] = useState(false);
   const reduced = useRef(false);
 
-  /* Clock is client-only so server and client markup match on first render. */
+  /* Respect reduced-motion (client-only). */
   useEffect(() => {
     reduced.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const tick = () => setNow(new Date());
-    tick();
-    const id = setInterval(tick, 60_000);
-    return () => clearInterval(id);
   }, []);
 
   /* Map pin → highlight (and reveal) its card. */
@@ -213,11 +158,11 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
     return out;
   }, [userPos, branches]);
 
-  const nearest = userPos ? [...branches].sort((a, b) => distances[a.city] - distances[b.city])[0] : null;
+  const nearest = userPos ? [...branches].filter((b) => distances[b.city] !== undefined).sort((a, b) => distances[a.city] - distances[b.city])[0] ?? null : null;
 
   const visible = useMemo(() => {
     const list = tab === ALL ? [...branches] : branches.filter((b) => b.city === tab);
-    return userPos ? list.sort((a, b) => distances[a.city] - distances[b.city]) : list;
+    return userPos ? list.sort((a, b) => (distances[a.city] ?? Infinity) - (distances[b.city] ?? Infinity)) : list;
   }, [tab, branches, userPos, distances]);
 
   /* ---- Auto tour ---- */
@@ -290,11 +235,12 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         const here: [number, number] = [pos.coords.latitude, pos.coords.longitude];
-        const closest = branches.reduce((a, b) => (distanceKm(here, COORDS[b.city]) < distanceKm(here, COORDS[a.city]) ? b : a));
+        const located = branches.filter((b) => COORDS[b.city]);
+        const closest = located.reduce<Branch | null>((a, b) => (!a || distanceKm(here, COORDS[b.city]) < distanceKm(here, COORDS[a.city]) ? b : a), null);
         setUserPos(here);
         setGeo("ok");
         setTab(ALL);
-        setActive(closest.city);
+        setActive(closest?.city ?? null);
       },
       (err) => setGeo(err.code === err.PERMISSION_DENIED ? "denied" : "error"),
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 }
@@ -447,7 +393,6 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
           {visible.map((b, idx) => {
             const isHub = b === hub;
             const isActive = active === b.city;
-            const status = b.hours && now ? hoursStatus(b.hours, now) : null;
             const isNearest = nearest?.city === b.city;
             return (
               <article
@@ -476,12 +421,6 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
                       <Crosshair size={11} /> Nearest to you
                     </span>
                   )}
-                  {status && (
-                    <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-wider px-3 py-1.5 rounded-full ${status.open ? (isHub ? "bg-emerald-400/15 text-emerald-300" : "bg-emerald-500/10 text-emerald-700") : isHub ? "bg-white/10 text-[#9DC8E6]" : "bg-slate-100 text-slate-500"}`}>
-                      <span className={`w-1.5 h-1.5 rounded-full ${status.open ? "bg-emerald-500 animate-pulse" : "bg-slate-400"}`} />
-                      {status.text}
-                    </span>
-                  )}
                 </div>
 
                 <div className="flex items-baseline justify-between gap-3">
@@ -502,20 +441,6 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
                         <span className="opacity-70">{ph.label}</span>
                         <a href={`tel:${(ph.dial ?? ph.number).replace(/[^+\d]/g, "")}`} className="font-semibold hover:underline">{ph.number}</a>
                       </li>
-                    ))}
-                  </ul>
-                )}
-
-                {b.hours && (
-                  <p className={`mt-3 flex items-center gap-2 text-sm ${isHub ? "text-[#BFE3F7]" : "text-[#082F49]"}`}>
-                    <Clock size={14} className="text-[#0284C7] shrink-0" /> {b.hours.label}
-                  </p>
-                )}
-
-                {b.services && b.services.length > 0 && (
-                  <ul className="mt-4 flex flex-wrap gap-1.5" aria-label={`Services at ${b.city}`}>
-                    {b.services.map((s) => (
-                      <li key={s} className={`text-[11px] font-semibold px-2.5 py-1 rounded-full ${isHub ? "bg-white/10 text-[#BFE3F7]" : "bg-[#EAF6FF] text-[#0369A1]"}`}>{s}</li>
                     ))}
                   </ul>
                 )}
