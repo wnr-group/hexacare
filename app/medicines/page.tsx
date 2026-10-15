@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ChevronLeft, ChevronRight, Search, SearchX } from "lucide-react";
+import { ChevronLeft, ChevronRight, SearchX } from "lucide-react";
+import MedicineFilters from "@/components/medicines/MedicineFilters";
 import MedicineCard from "@/components/medicines/MedicineCard";
 import { dosageForms, medicines, searchMedicines, specialities, titleCase } from "@/lib/medicines";
 
@@ -12,8 +13,6 @@ export const metadata: Metadata = {
 type SP = Record<string, string | string[] | undefined>;
 const one = (v: string | string[] | undefined) => (Array.isArray(v) ? v[0] : v) || undefined;
 
-const field =
-  "w-full rounded-xl border border-sky-200 bg-white px-3.5 py-2.5 text-sm text-[#082F49] outline-none transition focus:border-[#0284C7] focus:ring-2 focus:ring-[#0284C7]/20";
 
 export default async function MedicinesPage({ searchParams }: { searchParams: Promise<SP> }) {
   const sp = await searchParams;
@@ -46,39 +45,11 @@ export default async function MedicinesPage({ searchParams }: { searchParams: Pr
             {medicines.length.toLocaleString("en-IN")} products from trusted manufacturers. Search by brand, molecule or manufacturer.
           </p>
 
-          <form
-            action="/medicines"
-            className="mt-8 grid gap-3 rounded-2xl border border-sky-100 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] lg:items-center"
-          >
-            <label className="relative block sm:col-span-2 lg:col-span-1">
-              <span className="sr-only">Search</span>
-              <Search size={18} className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input name="q" defaultValue={query.q} placeholder="Search medicine, molecule, manufacturer…" className={`${field} pl-10`} />
-            </label>
-            <select name="form" defaultValue={query.form ?? ""} aria-label="Dosage form" className={field}>
-              <option value="">All forms</option>
-              {dosageForms.map((f) => <option key={f} value={f}>{titleCase(f)}</option>)}
-            </select>
-            <select name="speciality" defaultValue={query.speciality ?? ""} aria-label="Speciality" className={field}>
-              <option value="">All specialities</option>
-              {specialities.map((s) => <option key={s} value={s}>{s}</option>)}
-            </select>
-            <select name="sort" defaultValue={query.sort ?? ""} aria-label="Sort" className={field}>
-              <option value="">Relevance</option>
-              <option value="name">Name A–Z</option>
-              <option value="price-asc">Price: low to high</option>
-              <option value="price-desc">Price: high to low</option>
-            </select>
-            <div className="flex items-center gap-3 sm:col-span-2 lg:col-span-1">
-              <label className="flex items-center gap-2 whitespace-nowrap text-sm font-medium text-[#4B6584]">
-                <input type="checkbox" name="stock" value="in" defaultChecked={query.stock === "in"} className="h-4 w-4 accent-[#0284C7]" />
-                In stock
-              </label>
-              <button className="ml-auto cursor-pointer rounded-xl bg-[#0284C7] px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-sky-500/20 transition hover:bg-[#075985] active:scale-95 lg:ml-0">
-                Search
-              </button>
-            </div>
-          </form>
+          <MedicineFilters
+            initial={{ q: query.q ?? "", form: query.form ?? "", speciality: query.speciality ?? "", sort: query.sort ?? "", stock: query.stock === "in" }}
+            forms={dosageForms.map((f) => ({ value: f, label: titleCase(f) }))}
+            specialities={specialities}
+          />
         </div>
       </section>
 
@@ -88,7 +59,6 @@ export default async function MedicinesPage({ searchParams }: { searchParams: Pr
             <p>
               <strong className="text-[#082F49]">{total.toLocaleString("en-IN")}</strong> medicines{filtered ? " match your filters" : ""}
             </p>
-            {filtered && <Link href="/medicines" className="font-semibold text-[#0284C7] hover:underline">Clear filters</Link>}
           </div>
 
           {items.length ? (
