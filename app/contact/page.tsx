@@ -112,7 +112,25 @@ const locations = [
       { label: "Mobile", number: "98419 82636", dial: "+919841982636" }
     ],
     whatsapp: "919790431350",
-    email: "trichy@hexacare.in"
+    email: "trichy@hexacare.in",
+    photos: [
+      { src: "/branches/trichy/front.webp", caption: "Our office", position: "50% 45%" },
+      { src: "/branches/trichy/street.webp", caption: "Street view", position: "50% 55%" },
+      { src: "/branches/trichy/street-2.webp", caption: "Anna Nagar, Tennur", position: "50% 55%" },
+      { src: "/branches/trichy/signboard.webp", caption: "Entrance", position: "50% 40%" },
+      { src: "/branches/trichy/waiting.webp", caption: "Waiting area" },
+      { src: "/branches/trichy/waiting-2.webp", caption: "Reception" },
+      { src: "/branches/trichy/entrance.webp", caption: "Reception hall", position: "50% 60%" },
+      { src: "/branches/trichy/workstation.webp", caption: "Operations desk", position: "50% 60%" },
+      { src: "/branches/trichy/workstation-2.webp", caption: "Work area", position: "50% 55%" },
+      { src: "/branches/trichy/workstation-3.webp", caption: "Work area", position: "50% 55%" },
+      { src: "/branches/trichy/shrine.webp", caption: "Prayer nook", position: "50% 55%" },
+      { src: "/branches/trichy/cabin.webp", caption: "Manager's cabin", position: "50% 60%" },
+      { src: "/branches/trichy/storage.webp", caption: "Medicine storage", position: "50% 60%" },
+      { src: "/branches/trichy/storage-2.webp", caption: "Storage aisle", position: "50% 55%" },
+      { src: "/branches/trichy/storage-3.webp", caption: "Dispatch & storage", position: "50% 55%" },
+      { src: "/branches/trichy/cold-storage.webp", caption: "Cold storage", position: "50% 60%" }
+    ]
   },
   {
     type: "Branch Office",
