@@ -3,6 +3,18 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import ConditionCarousel, { type CarouselCondition } from "@/components/conditions/ConditionCarousel";
 import * as THREE from "three";
+import {
+  motion,
+  MotionConfig,
+  useScroll,
+  useSpring,
+  useTransform,
+  useMotionValue,
+  useMotionTemplate,
+  useInView,
+  useReducedMotion,
+  animate,
+} from "framer-motion";
 import { CapsuleScene, MoleculeSatellites } from "@/components/common/ThreeScenes";
 import {
   ShieldCheck,
@@ -28,145 +40,128 @@ interface RevealProps {
   delay?: number;
 }
 function Reveal({ children, className = "", delay = 0 }: RevealProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const obs = new IntersectionObserver((entries) => {
-      entries.forEach((e) => {
-        if (e.isIntersecting) {
-          setVisible(true);
-          obs.unobserve(el);
-        }
-      });
-    }, { threshold: 0.1 });
-    obs.observe(el);
-    return () => obs.disconnect();
-  }, []);
   return (
-    <div
-      ref={ref}
-      style={{ transitionDelay: `${delay}ms` }}
-      className={`transition-all duration-1000 ease-out ${
-        visible ? "opacity-100 translate-y-0 blur-0 scale-100" : "opacity-0 translate-y-10 blur-[6px] scale-[0.97]"
-      } ${className}`}
+    <motion.div
+      className={className}
+      initial={{ opacity: 0, y: 40, scale: 0.97, filter: "blur(6px)" }}
+      whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+      viewport={{ once: true, amount: 0.1 }}
+      transition={{ duration: 0.9, delay: delay / 1000, ease: [0.22, 1, 0.36, 1] }}
     >
       {children}
-    </div>
+    </motion.div>
   );
-}
-
-function prefersReducedMotion() {
-  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
 
 /* Thin brand-coloured bar that fills as the page is scrolled */
 function ScrollProgress() {
-  const barRef = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      const p = max > 0 ? window.scrollY / max : 0;
-      if (barRef.current) barRef.current.style.transform = `scaleX(${p})`;
-    };
-    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
-    update();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, []);
+  const { scrollYProgress } = useScroll();
+  const scaleX = useSpring(scrollYProgress, { stiffness: 120, damping: 30, restDelta: 0.001 });
   return (
     <div className="fixed top-0 left-0 right-0 h-[3px] z-[60] pointer-events-none">
-      <div
-        ref={barRef}
+      <motion.div
+        style={{ scaleX }}
         className="h-full origin-left bg-gradient-to-r from-[#0284C7] via-[#22D3EE] to-[#0284C7]"
-        style={{ transform: "scaleX(0)" }}
       />
     </div>
   );
 }
 
-/* Moves its children at a different speed than the page for a depth effect */
-function Parallax({ speed = 0.1, className = "", children }: { speed?: number; className?: string; children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  useEffect(() => {
-    if (prefersReducedMotion()) return;
-    let raf = 0;
-    const update = () => {
-      raf = 0;
-      if (ref.current) ref.current.style.transform = `translate3d(0, ${Math.min(window.scrollY, 900) * speed}px, 0)`;
-    };
-    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", onScroll);
-      if (raf) cancelAnimationFrame(raf);
-    };
-  }, [speed]);
-  return <div ref={ref} className={`will-change-transform ${className}`}>{children}</div>;
+/* Fades in on load, then moves at a different speed than the page for a depth effect */
+function Parallax({ speed = 0.1, enterDelay = 0, className = "", children }: { speed?: number; enterDelay?: number; className?: string; children: React.ReactNode }) {
+  const { scrollY } = useScroll();
+  const y = useTransform(scrollY, [0, 900], [0, 900 * speed]);
+  return (
+    <motion.div
+      style={{ y }}
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.9, delay: enterDelay }}
+      className={className}
+    >
+      {children}
+    </motion.div>
+  );
 }
 
 /* Counts the first number in `value` up from 0 when scrolled into view, e.g. "3500+" or "₹70Cr+" */
 function CountUp({ value }: { value: string }) {
   const match = /^(\D*?)(\d+)(?!\d*\s*[–-])(.*)$/.exec(value);
-  const [shown, setShown] = useState(0);
   const ref = useRef<HTMLSpanElement>(null);
+  const inView = useInView(ref, { once: true, amount: 0.4 });
+  const reduced = useReducedMotion();
+  const [shown, setShown] = useState(0);
   const target = match ? parseInt(match[2], 10) : 0;
   useEffect(() => {
-    const el = ref.current;
-    if (!el || !match) return;
-    let raf = 0;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (!entry.isIntersecting) return;
-      obs.disconnect();
-      if (prefersReducedMotion()) { setShown(target); return; }
-      const start = performance.now();
-      const duration = 1800;
-      const tick = (now: number) => {
-        const t = Math.min((now - start) / duration, 1);
-        setShown(Math.round(target * (1 - Math.pow(1 - t, 3))));
-        if (t < 1) raf = requestAnimationFrame(tick);
-      };
-      raf = requestAnimationFrame(tick);
-    }, { threshold: 0.4 });
-    obs.observe(el);
-    return () => { obs.disconnect(); cancelAnimationFrame(raf); };
+    if (!inView || !match) return;
+    const controls = animate(0, target, {
+      duration: reduced ? 0 : 1.8,
+      ease: "easeOut",
+      onUpdate: (v) => setShown(Math.round(v)),
+    });
+    return () => controls.stop();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [target]);
-  if (!match) return <>{value}</>;
-  return <span ref={ref}>{match[1]}{shown}{match[3]}</span>;
+  }, [inView, target, reduced]);
+  return <span ref={ref}>{match ? `${match[1]}${shown}${match[3]}` : value}</span>;
 }
 
 /* Card that tilts toward the cursor with a moving highlight */
 function TiltCard({ className = "", children }: { className?: string; children: React.ReactNode }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    const el = ref.current;
-    if (!el || prefersReducedMotion()) return;
-    const r = el.getBoundingClientRect();
-    const x = (e.clientX - r.left) / r.width;
-    const y = (e.clientY - r.top) / r.height;
-    el.style.transform = `perspective(900px) rotateX(${(0.5 - y) * 8}deg) rotateY(${(x - 0.5) * 8}deg) translateZ(0)`;
-    el.style.setProperty("--mx", `${x * 100}%`);
-    el.style.setProperty("--my", `${y * 100}%`);
-  };
-  const onLeave = () => {
-    if (ref.current) ref.current.style.transform = "";
-  };
+  const px = useMotionValue(50);
+  const py = useMotionValue(50);
+  const spring = { stiffness: 220, damping: 22 };
+  const rotateX = useSpring(useTransform(py, [0, 100], [5, -5]), spring);
+  const rotateY = useSpring(useTransform(px, [0, 100], [-5, 5]), spring);
+  const glow = useMotionTemplate`radial-gradient(260px circle at ${px}% ${py}%, rgba(34,211,238,0.18), transparent 60%)`;
   return (
-    <div
-      ref={ref}
-      onMouseMove={onMove}
-      onMouseLeave={onLeave}
-      className={`tilt-card relative transition-transform duration-300 ease-out ${className}`}
+    <motion.div
+      initial="rest"
+      whileHover="hover"
+      onMouseMove={(e) => {
+        const r = e.currentTarget.getBoundingClientRect();
+        px.set(((e.clientX - r.left) / r.width) * 100);
+        py.set(((e.clientY - r.top) / r.height) * 100);
+      }}
+      onMouseLeave={() => { px.set(50); py.set(50); }}
+      style={{ rotateX, rotateY, transformPerspective: 900 }}
+      className={`relative ${className}`}
     >
       {children}
-    </div>
+      <motion.div
+        aria-hidden
+        variants={{ rest: { opacity: 0 }, hover: { opacity: 1 } }}
+        style={{ background: glow }}
+        className="absolute inset-0 rounded-[inherit] pointer-events-none"
+      />
+    </motion.div>
+  );
+}
+
+/* Gradient headline text with a flowing highlight */
+function GradientText({ children }: { children: React.ReactNode }) {
+  const reduced = useReducedMotion();
+  return (
+    <motion.span
+      className="gradient-text"
+      animate={reduced ? undefined : { backgroundPosition: ["0% 50%", "200% 50%"] }}
+      transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
+    >
+      {children}
+    </motion.span>
+  );
+}
+
+/* Light streak that sweeps across a button */
+function ShineSweep() {
+  return (
+    <motion.span
+      aria-hidden
+      className="pointer-events-none absolute inset-y-0 left-0 w-2/5 bg-gradient-to-r from-transparent via-white/70 to-transparent"
+      style={{ skewX: -20 }}
+      initial={{ x: "-120%" }}
+      animate={{ x: "260%" }}
+      transition={{ duration: 1.4, repeat: Infinity, repeatDelay: 3.1, ease: "easeInOut" }}
+    />
   );
 }
 
@@ -366,36 +361,13 @@ function SpecimenChamber() {
 // --- MAIN PAGE COMPONENT ---
 export default function Homepage({ conditions, featured }: { conditions: CarouselCondition[]; featured: React.ReactNode }) {
   return (
+    <MotionConfig reducedMotion="user">
     <div
       className="min-h-screen bg-[#EAF6FF] text-[#0B2545] overflow-x-clip"
     >
       <style>{`
         @keyframes scan { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
-        @keyframes floatSlow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
-        .float-slow { animation: floatSlow 6s ease-in-out infinite; }
-        @keyframes floatSlowAlt { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-8px) rotate(-1.5deg); } }
-        .float-slow-alt { animation: floatSlowAlt 5s ease-in-out infinite; }
-        @keyframes gradientShift { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
-        .gradient-text { background: linear-gradient(90deg, #0284C7, #22D3EE, #0284C7); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gradientShift 5s linear infinite; }
-        @keyframes blobDrift { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(40px, -30px) scale(1.08); } 66% { transform: translate(-30px, 25px) scale(0.95); } }
-        .blob-drift { animation: blobDrift 16s ease-in-out infinite; }
-        .blob-drift-b { animation: blobDrift 20s ease-in-out infinite reverse; }
-        @keyframes spinSlow { to { transform: rotate(360deg); } }
-        .spin-slow { animation: spinSlow 40s linear infinite; }
-        .spin-slow-rev { animation: spinSlow 60s linear infinite reverse; }
-        @keyframes ringPulse { 0% { transform: scale(0.9); opacity: 0.5; } 100% { transform: scale(1.25); opacity: 0; } }
-        .ring-pulse { animation: ringPulse 3.5s ease-out infinite; }
-        @keyframes shineSweep { 0% { transform: translateX(-120%) skewX(-20deg); } 60%, 100% { transform: translateX(260%) skewX(-20deg); } }
-        .shine-btn { position: relative; overflow: hidden; }
-        .shine-btn::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent); transform: translateX(-120%) skewX(-20deg); animation: shineSweep 4.5s ease-in-out infinite; pointer-events: none; }
-        .tilt-card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 300ms; background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(34,211,238,0.18), transparent 60%); }
-        .tilt-card:hover::before { opacity: 1; }
-        @keyframes fadeUpIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
-        .hero-in { opacity: 0; animation: fadeUpIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
-        @media (prefers-reduced-motion: reduce) {
-          .float-slow, .float-slow-alt, .gradient-text, .blob-drift, .blob-drift-b, .spin-slow, .spin-slow-rev, .ring-pulse, .shine-btn::after { animation: none !important; }
-          .hero-in { animation: none !important; opacity: 1; }
-        }
+        .gradient-text { background: linear-gradient(90deg, #0284C7, #22D3EE, #0284C7); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; }
       `}</style>
 
       <ScrollProgress />
@@ -405,27 +377,27 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
         <section className="relative px-6 md:px-16 pt-28 pb-16 md:py-24 overflow-hidden border-b border-[#0284C7]/15 bg-gradient-to-b from-[#CFEBFF] via-[#EAF6FF] to-[#EAF6FF]">
           {/* ambient background glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-[#0284C7]/5 rounded-full blur-3xl -z-0" />
-          <div className="blob-drift absolute -top-20 left-[8%] w-[380px] h-[380px] bg-[#22D3EE]/20 rounded-full blur-3xl" />
-          <div className="blob-drift-b absolute bottom-0 right-[6%] w-[440px] h-[440px] bg-[#0284C7]/20 rounded-full blur-3xl" />
+          <motion.div animate={{ x: [0, 40, -30, 0], y: [0, -30, 25, 0], scale: [1, 1.08, 0.95, 1] }} transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-20 left-[8%] w-[380px] h-[380px] bg-[#22D3EE]/20 rounded-full blur-3xl" />
+          <motion.div animate={{ x: [0, 40, -30, 0], y: [0, -30, 25, 0], scale: [1, 1.08, 0.95, 1] }} transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", repeatType: "mirror" }} className="absolute bottom-0 right-[6%] w-[440px] h-[440px] bg-[#0284C7]/20 rounded-full blur-3xl" />
 
           <div className="max-w-[1440px] mx-auto relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
 
               {/* LEFT — Male doctor */}
               <div className="hidden lg:flex lg:col-span-3 justify-end items-end h-full">
-                <Parallax speed={0.07} className="hero-in relative w-full max-w-[300px]">
+                <Parallax speed={0.07} enterDelay={0.3} className="relative w-full max-w-[300px]">
                   <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[260px] h-[260px] bg-[#0284C7]/15 rounded-full blur-3xl -z-10" />
-                  <img
+                  <motion.img animate={{ y: [0, -10, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
                     src="hero_male_doctor.png"
                     alt="Male doctor pointing toward specialty medicine offerings"
-                    className="float-slow w-full h-[440px] object-contain object-bottom drop-shadow-2xl"
+                    className="w-full h-[440px] object-contain object-bottom drop-shadow-2xl"
                   />
-                  <div className="float-slow-alt absolute right-2 top-16 bg-white rounded-2xl shadow-lg shadow-[#0284C7]/20 border border-[#0284C7]/10 px-4 py-3 flex items-center gap-2">
+                  <motion.div animate={{ y: [0, -8, 0], rotate: [0, -1.5, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} className="absolute right-2 top-16 bg-white rounded-2xl shadow-lg shadow-[#0284C7]/20 border border-[#0284C7]/10 px-4 py-3 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-[#22D3EE] animate-pulse" />
                     <span className="font-mono text-[11px] font-semibold text-[#082F49]">
                       GENUINE STOCK
                     </span>
-                  </div>
+                  </motion.div>
                 </Parallax>
               </div>
 
@@ -437,7 +409,7 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
                   </span>
                   <h1 className="font-display font-bold text-[40px] leading-[1.1] sm:text-[52px] md:text-[64px] text-[#082F49] mb-6 tracking-tight max-w-4xl mx-auto">
                     Super specialty medicine, <br />
-                    <span className="gradient-text">delivered direct</span> to you.
+                    <GradientText>delivered direct</GradientText> to you.
                   </h1>
                 </Reveal>
                 
@@ -451,34 +423,35 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
                 {/* Quick Actions */}
                 <Reveal delay={450}>
                   <div className="mt-8 flex flex-wrap justify-center gap-4">
-                    <button className="flex items-center gap-2 bg-white text-[#082F49] border border-[#0284C7]/20 px-6 py-3 rounded-full hover:bg-[#EAF6FF] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#0284C7]/20 shine-btn font-medium shadow-sm">
+                    <motion.button whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="flex items-center gap-2 bg-white text-[#082F49] border border-[#0284C7]/20 px-6 py-3 rounded-full hover:bg-[#EAF6FF] transition-shadow duration-300 hover:shadow-lg hover:shadow-[#0284C7]/20 relative overflow-hidden font-medium shadow-sm">
+                      <ShineSweep />
                       <UploadCloud size={18} className="text-[#0284C7]" /> Order via
                       Prescription
-                    </button>
-                    <button className="flex items-center gap-2 bg-white text-[#082F49] border border-[#0284C7]/20 px-6 py-3 rounded-full hover:bg-[#EAF6FF] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#0284C7]/20 shine-btn font-medium shadow-sm">
+                    </motion.button>
+                    <motion.button whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="flex items-center gap-2 bg-white text-[#082F49] border border-[#0284C7]/20 px-6 py-3 rounded-full hover:bg-[#EAF6FF] transition-shadow duration-300 hover:shadow-lg hover:shadow-[#0284C7]/20 relative overflow-hidden font-medium shadow-sm">
+                      <ShineSweep />
                       <Activity size={18} className="text-[#0284C7]" /> Patient
                       Assistance Program
-                    </button>
+                    </motion.button>
                   </div>
                 </Reveal>
               </div>
 
               {/* RIGHT — Female doctor */}
               <div className="hidden lg:flex lg:col-span-3 justify-start items-end h-full">
-                <Parallax speed={0.12} className="hero-in relative w-full max-w-[300px]" >
+                <Parallax speed={0.12} enterDelay={0.5} className="relative w-full max-w-[300px]">
                   <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[260px] h-[260px] bg-[#0284C7]/15 rounded-full blur-3xl -z-10" />
-                  <img
+                  <motion.img animate={{ y: [0, -10, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: -3 }}
                     src="hero_female_doctor.png"
                     alt="Female doctor pointing toward specialty medicine offerings"
-                    style={{ animationDelay: "-3s" }}
-                    className="float-slow w-full h-[440px] object-contain object-bottom drop-shadow-2xl"
+                    className="w-full h-[440px] object-contain object-bottom drop-shadow-2xl"
                   />
-                  <div style={{ animationDelay: "-2s" }} className="float-slow-alt absolute left-2 top-16 bg-white rounded-2xl shadow-lg shadow-[#0284C7]/20 border border-[#0284C7]/10 px-4 py-3 flex items-center gap-2">
+                  <motion.div animate={{ y: [0, -8, 0], rotate: [0, -1.5, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: -2 }} className="absolute left-2 top-16 bg-white rounded-2xl shadow-lg shadow-[#0284C7]/20 border border-[#0284C7]/10 px-4 py-3 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-[#0284C7] animate-pulse" />
                     <span className="font-mono text-[11px] font-semibold text-[#082F49]">
                       GENUINE THERAPIES
                     </span>
-                  </div>
+                  </motion.div>
                 </Parallax>
               </div>
 
@@ -499,7 +472,7 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
                 <Reveal key={label} delay={i * 120}>
                   <div className="group flex items-center gap-3 text-[#082F49] cursor-default">
                     <span className="relative flex items-center justify-center w-11 h-11 rounded-full bg-[#0284C7]/10 group-hover:bg-[#0284C7] transition-colors duration-300">
-                      <span className="ring-pulse absolute inset-0 rounded-full border border-[#0284C7]/40" />
+                      <motion.span animate={{ scale: [0.9, 1.25], opacity: [0.5, 0] }} transition={{ duration: 3.5, repeat: Infinity, ease: "easeOut" }} className="absolute inset-0 rounded-full border border-[#0284C7]/40" />
                       <Icon size={22} className="text-[#0284C7] group-hover:text-white group-hover:scale-110 transition-all duration-300" />
                     </span>
                     <span className="font-display font-bold text-sm md:text-base tracking-tight">
@@ -633,9 +606,9 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
                   </div>
 
                   <div className="lg:col-span-5 relative h-[340px] sm:h-[420px] lg:h-[480px]">
-                    <div className="spin-slow absolute inset-4 rounded-full border border-dashed border-white/20" />
-                    <div className="spin-slow-rev absolute inset-14 rounded-full border border-[#22D3EE]/25" />
-                    <div className="ring-pulse absolute inset-10 rounded-full border border-[#22D3EE]/40" />
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 40, repeat: Infinity, ease: "linear" }} className="absolute inset-4 rounded-full border border-dashed border-white/20" />
+                    <motion.div animate={{ rotate: -360 }} transition={{ duration: 60, repeat: Infinity, ease: "linear" }} className="absolute inset-14 rounded-full border border-[#22D3EE]/25" />
+                    <motion.div animate={{ scale: [0.9, 1.25], opacity: [0.5, 0] }} transition={{ duration: 3.5, repeat: Infinity, ease: "easeOut" }} className="absolute inset-10 rounded-full border border-[#22D3EE]/40" />
                     <CapsuleScene />
                   </div>
                 </div>
@@ -749,22 +722,22 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
                   <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden bg-gradient-to-b from-[#082F49] via-[#0A3B5F] to-[#04202F] border border-white/60 shadow-2xl shadow-[#082F49]/30">
                     <div className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(white_1px,transparent_1px),linear-gradient(90deg,white_1px,transparent_1px)] [background-size:40px_40px]" />
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[75%] aspect-square rounded-full bg-[#0284C7]/30 blur-3xl" />
-                    <div className="spin-slow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] aspect-square rounded-full border border-dashed border-white/20" />
-                    <div className="ring-pulse absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] aspect-square rounded-full border border-[#22D3EE]/40" />
+                    <motion.div animate={{ rotate: 360 }} transition={{ duration: 40, repeat: Infinity, ease: "linear" }} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] aspect-square rounded-full border border-dashed border-white/20" />
+                    <motion.div animate={{ scale: [0.9, 1.25], opacity: [0.5, 0] }} transition={{ duration: 3.5, repeat: Infinity, ease: "easeOut" }} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] aspect-square rounded-full border border-[#22D3EE]/40" />
                     <MoleculeSatellites />
 
-                    <div className="float-slow-alt absolute top-5 left-5 flex items-center gap-2 px-3.5 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
+                    <motion.div animate={{ y: [0, -8, 0], rotate: [0, -1.5, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} className="absolute top-5 left-5 flex items-center gap-2 px-3.5 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
                       <span className="w-2 h-2 rounded-full bg-[#22D3EE] animate-pulse" />
                       <span className="text-white font-mono text-[10px] tracking-widest font-bold">TEMPERATURE: 2&ndash;8&deg;C</span>
-                    </div>
-                    <div className="float-slow absolute bottom-5 left-5 right-5 flex items-center gap-3 p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
+                    </motion.div>
+                    <motion.div animate={{ y: [0, -10, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} className="absolute bottom-5 left-5 right-5 flex items-center gap-3 p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
                       <div className="shrink-0 w-10 h-10 rounded-xl bg-[#22D3EE]/20 flex items-center justify-center">
                         <ShieldCheck size={20} className="text-[#22D3EE]" />
                       </div>
                       <p className="text-white text-sm leading-snug">
                         <span className="font-bold">Potency protected.</span> <span className="text-white/75">Every dose arrives as the manufacturer intended.</span>
                       </p>
-                    </div>
+                    </motion.div>
                   </div>
                 </div>
               </div>
@@ -843,5 +816,6 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
 
       </main>
     </div>
+    </MotionConfig>
   );
 }
