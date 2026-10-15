@@ -43,14 +43,34 @@ function WhatsAppIcon({ size = 14, className = "" }: { size?: number; className?
 /* Hero photo with a thumbnail strip. Sits flush at the top of a branch card. */
 function BranchGallery({ city, photos, dark }: { city: string; photos: BranchPhoto[]; dark: boolean }) {
   const [i, setI] = useState(0);
+  const [hold, setHold] = useState(false); // pointer/focus is on the gallery
+  const [inView, setInView] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
   const go = (n: number) => setI((n + photos.length) % photos.length);
   const cur = photos[i];
+
+  /* Slides advance when the progress bar finishes, so pausing it pauses the show. */
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.3 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  const paused = hold || !inView;
   const arrow =
     "absolute top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#041B2D]/55 backdrop-blur-md border border-white/20 text-white flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover/gal:opacity-100 focus-visible:opacity-100 hover:bg-[#041B2D]/80 transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#22D3EE]";
 
   return (
     <div className="-mx-6 -mt-6 mb-5" onClick={(e) => e.stopPropagation()}>
-      <div className="group/gal relative aspect-[16/10] overflow-hidden rounded-t-[1.75rem] bg-[#06263B]">
+      <div
+        ref={box}
+        onMouseEnter={() => setHold(true)}
+        onMouseLeave={() => setHold(false)}
+        onFocus={() => setHold(true)}
+        onBlur={() => setHold(false)}
+        className="group/gal relative aspect-[16/10] overflow-hidden rounded-t-[1.75rem] bg-[#06263B]"
+      >
         {photos.map((p, idx) => (
           <Image
             key={p.src}
@@ -59,10 +79,20 @@ function BranchGallery({ city, photos, dark }: { city: string; photos: BranchPho
             fill
             sizes="(min-width: 1024px) 40vw, 100vw"
             style={{ objectPosition: p.position }}
-            className={`object-cover transition-all duration-700 ease-out ${idx === i ? "opacity-100 scale-100" : "opacity-0 scale-105"}`}
+            className={`hx-kb object-cover ${idx === i ? "opacity-100 scale-[1.12]" : "opacity-0 scale-100"}`}
           />
         ))}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#041B2D]/80 via-transparent to-[#041B2D]/15" />
+        {photos.length > 1 && (
+          <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] bg-white/15">
+            <span
+              key={i}
+              onAnimationEnd={() => go(i + 1)}
+              className="hx-slide-bar block h-full origin-left bg-[#22D3EE]"
+              style={{ animationPlayState: paused ? "paused" : "running" }}
+            />
+          </span>
+        )}
         <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5">
           <span key={i} className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white animate-[hx-cap_.5s_ease-out]">
             <span className="h-1.5 w-1.5 rounded-full bg-[#22D3EE]" />
@@ -366,6 +396,9 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
   return (
     <div ref={rootRef} className="space-y-8">
       <style>{`
+        @keyframes hx-slide { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+        .hx-slide-bar { animation: hx-slide 4.5s linear forwards; }
+        .hx-kb { transition: opacity 1.1s ease-in-out, transform 6s cubic-bezier(.2,.6,.2,1); }
         @keyframes hx-cap { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
         @keyframes hx-flow { to { stroke-dashoffset: -20; } }
         @keyframes hx-ping { 0% { transform: scale(.7); opacity: .6; } 100% { transform: scale(2.1); opacity: 0; } }
@@ -399,8 +432,9 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
         .hx-map .leaflet-bar a { color: #082F49; }
 
         @media (prefers-reduced-motion: reduce) {
-          .hx-card-in, .hx-route, [class*="hx-cap"], .hx-beat, .hx-pin--active .hx-pin__ping { animation: none !important; }
+          .hx-card-in, .hx-route, [class*="hx-cap"], .hx-slide-bar, .hx-beat, .hx-pin--active .hx-pin__ping { animation: none !important; }
           .hx-beat { stroke-dashoffset: 0; }
+          .hx-kb { transition: opacity .3s !important; transform: none !important; }
         }
       `}</style>
 
