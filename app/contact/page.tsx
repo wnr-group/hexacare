@@ -91,7 +91,17 @@ const locations = [
       { label: "Mobile", number: "98848 45804", dial: "+919884845804" }
     ],
     whatsapp: "919629199621",
-    email: "coimbatore@hexacare.in"
+    email: "coimbatore@hexacare.in",
+    photos: [
+      { src: "/branches/coimbatore/building.webp", caption: "Our office", position: "50% 35%" },
+      { src: "/branches/coimbatore/reception.webp", caption: "Reception" },
+      { src: "/branches/coimbatore/reception-2.webp", caption: "Reception & waiting area" },
+      { src: "/branches/coimbatore/cabin.webp", caption: "Manager's cabin" },
+      { src: "/branches/coimbatore/cabin-2.webp", caption: "Executive cabin" },
+      { src: "/branches/coimbatore/storage.webp", caption: "Medicine storage" },
+      { src: "/branches/coimbatore/storage-2.webp", caption: "Storage aisle" },
+      { src: "/branches/coimbatore/cold-room.webp", caption: "Cold room" }
+    ]
   },
   {
     type: "Branch Office",
