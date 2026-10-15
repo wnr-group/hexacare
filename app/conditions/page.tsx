@@ -3,7 +3,6 @@ import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { conditionIcon } from "@/components/conditions/conditionIcons";
 import { conditions } from "@/lib/conditions";
-import { specialityStats } from "@/lib/medicines";
 
 export const metadata: Metadata = {
   title: "Conditions | Hexacare",
@@ -25,7 +24,6 @@ export default function ConditionsPage() {
         <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 min-[480px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
           {conditions.map((c) => {
             const Icon = conditionIcon(c.name);
-            const { available } = specialityStats(c.name);
             return (
               <Link
                 key={c.slug}
@@ -35,10 +33,7 @@ export default function ConditionsPage() {
                 <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#EAF6FF] text-[#0284C7] transition-colors group-hover:bg-[#0284C7] group-hover:text-white">
                   <Icon size={22} />
                 </span>
-                <span className="min-w-0 flex-1">
-                  <span className="block truncate font-bold text-[#082F49]">{c.name}</span>
-                  <span className="text-xs font-medium text-emerald-600">{available.toLocaleString("en-IN")} in stock</span>
-                </span>
+                <span className="min-w-0 flex-1 truncate font-bold text-[#082F49]">{c.name}</span>
                 <ArrowUpRight size={18} className="shrink-0 text-slate-300 transition group-hover:text-[#0284C7]" />
               </Link>
             );

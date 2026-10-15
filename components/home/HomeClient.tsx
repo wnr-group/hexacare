@@ -253,7 +253,6 @@ function SpecimenChamber() {
 export interface HomeCondition {
   name: string;
   slug: string;
-  available: number;
 }
 
 export default function Homepage({ conditions, featured }: { conditions: HomeCondition[]; featured: React.ReactNode }) {
@@ -467,7 +466,6 @@ export default function Homepage({ conditions, featured }: { conditions: HomeCon
                         <Icon size={24} />
                       </div>
                       <span className="font-semibold text-[#082F49] text-sm">{cat.name}</span>
-                      <span className="mt-1 text-xs font-medium text-emerald-600">{cat.available.toLocaleString("en-IN")} in stock</span>
                     </Link>
                   );
                 })}
