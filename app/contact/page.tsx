@@ -19,7 +19,7 @@ import {
   Radar,
   ShieldCheck,
 } from "lucide-react";
-import BranchNetwork from "@/components/contact/BranchNetwork";
+import BranchNetwork, { type Branch } from "@/components/contact/BranchNetwork";
 
 /* ---------- UI Helpers ---------- */
 function Reveal({ children, className = "", delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
@@ -70,7 +70,7 @@ const supportRoutes = [
   { icon: MessageSquare, title: "Media & Press", desc: "For PR inquiries, interviews, and media resources.", email: "press@hexacare.in" }
 ];
 
-const locations = [
+const locations: Branch[] = [
   {
     type: "Head Office",
     city: "Chennai",
@@ -80,7 +80,18 @@ const locations = [
       { label: "Mobile", number: "99622 29605", dial: "+919962229605" }
     ],
     whatsapp: "919940313588",
-    email: "chennai@hexacare.in"
+    email: "chennai@hexacare.in",
+    photos: [
+      { src: "/branches/chennai/reception.webp", caption: "Reception" },
+      { src: "/branches/chennai/reception-2.webp", caption: "Reception desk", position: "50% 45%" },
+      { src: "/branches/chennai/entrance.webp", caption: "Entrance", position: "50% 45%" },
+      { src: "/branches/chennai/office.webp", caption: "Office floor", position: "50% 55%" },
+      { src: "/branches/chennai/workstation.webp", caption: "Work area", position: "50% 55%" },
+      { src: "/branches/chennai/workstation-2.webp", caption: "Operations desk", position: "50% 55%" },
+      { src: "/branches/chennai/storage.webp", caption: "Medicine storage", position: "50% 50%" },
+      { src: "/branches/chennai/storage-2.webp", caption: "Storage aisle", position: "50% 50%" },
+      { src: "/branches/chennai/cold-room.webp", caption: "Cold room", position: "50% 50%" }
+    ]
   },
   {
     type: "Branch Office",
@@ -141,7 +152,11 @@ const locations = [
       { label: "Mobile", number: "98416 93344", dial: "+919841693344" }
     ],
     whatsapp: "919994406926",
-    email: "hexacaremadurai@gmail.com"
+    email: "hexacaremadurai@gmail.com",
+    photos: [
+      { src: "/branches/madurai/building.webp", caption: "Our office", fit: "contain" },
+      { src: "/branches/madurai/building-2.webp", caption: "Rathna Towers, S.S. Colony", fit: "contain" }
+    ]
   },
   {
     type: "Branch Office",

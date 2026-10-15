@@ -10,6 +10,7 @@ export interface BranchPhoto {
   src: string;
   caption: string;
   position?: string; // CSS object-position for cropping, defaults to centre
+  fit?: "cover" | "contain"; // contain shows the whole photo over a blurred copy of itself
 }
 
 export interface Branch {
@@ -72,15 +73,19 @@ function BranchGallery({ city, photos, dark }: { city: string; photos: BranchPho
         className="group/gal relative aspect-[16/10] overflow-hidden rounded-t-[1.75rem] bg-[#06263B]"
       >
         {photos.map((p, idx) => (
-          <Image
-            key={p.src}
-            src={p.src}
-            alt={idx === i ? `${city} office — ${p.caption}` : ""}
-            fill
-            sizes="(min-width: 1024px) 40vw, 100vw"
-            style={{ objectPosition: p.position }}
-            className={`hx-kb object-cover ${idx === i ? "opacity-100 scale-[1.12]" : "opacity-0 scale-100"}`}
-          />
+          <div key={p.src} className={`hx-kb absolute inset-0 ${idx === i ? "opacity-100 scale-[1.06]" : "opacity-0 scale-100"}`}>
+            {p.fit === "contain" && (
+              <Image src={p.src} alt="" fill sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover scale-125 blur-2xl brightness-75" />
+            )}
+            <Image
+              src={p.src}
+              alt={idx === i ? `${city} office — ${p.caption}` : ""}
+              fill
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              style={{ objectPosition: p.position }}
+              className={p.fit === "contain" ? "object-contain" : "object-cover"}
+            />
+          </div>
         ))}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#041B2D]/80 via-transparent to-[#041B2D]/15" />
         {photos.length > 1 && (
