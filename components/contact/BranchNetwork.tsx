@@ -3,7 +3,7 @@ import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import type { Map as LeafletMap, Marker } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Check, ChevronLeft, ChevronRight, Copy, Crosshair, Loader2, Mail, MapPin, Navigation, Phone } from "lucide-react";
+import { ChevronLeft, ChevronRight, Crosshair, Loader2, Mail, MapPin, Navigation, Phone } from "lucide-react";
 import { useAutoTour } from "./useAutoTour";
 
 export interface BranchPhoto {
@@ -171,7 +171,6 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
   const [active, setActive] = useState<string | null>(null);
   const [geo, setGeo] = useState<GeoState>("idle");
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
-  const [copied, setCopied] = useState<string | null>(null);
 
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
@@ -377,16 +376,6 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
       (err) => setGeo(err.code === err.PERMISSION_DENIED ? "denied" : "error"),
       { enableHighAccuracy: false, timeout: 10_000, maximumAge: 300_000 }
     );
-  };
-
-  const copyAddress = async (b: Branch) => {
-    try {
-      await navigator.clipboard.writeText(b.address);
-      setCopied(b.city);
-      setTimeout(() => setCopied((c) => (c === b.city ? null : c)), 2000);
-    } catch {
-      /* clipboard unavailable — silently ignore */
-    }
   };
 
   const geoMessage: Record<GeoState, string> = {
@@ -616,13 +605,6 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
                   >
                     <Navigation size={15} /> Get Directions
                   </a>
-                  <button
-                    onClick={() => copyAddress(b)}
-                    className={`inline-flex items-center gap-2 min-h-11 px-4 rounded-full text-sm font-bold border transition-colors cursor-pointer ${isHub ? "border-white/20 text-white hover:bg-white/10" : "border-[#082F49]/20 text-[#082F49] hover:bg-[#EAF6FF]"}`}
-                  >
-                    {copied === b.city ? <Check size={15} className="text-emerald-500" /> : <Copy size={15} />}
-                    <span aria-live="polite">{copied === b.city ? "Copied" : "Copy Address"}</span>
-                  </button>
                 </div>
                 {tour.running && isActive && (
                   <span aria-hidden="true" className="absolute left-6 right-6 bottom-0 h-[3px] rounded-full bg-[#22D3EE]/20 overflow-hidden">
