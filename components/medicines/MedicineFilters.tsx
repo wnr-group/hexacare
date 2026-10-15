@@ -3,7 +3,7 @@ import { useEffect, useRef, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { Loader2, Search, X } from 'lucide-react';
 
-interface Values { q: string; form: string; speciality: string; condition: string; sort: string; stock: boolean }
+interface Values { q: string; form: string; speciality: string; sort: string; stock: boolean }
 
 const field =
   "w-full rounded-xl border border-sky-200 bg-white px-3.5 py-2.5 text-sm text-[#082F49] outline-none transition focus:border-[#0284C7] focus:ring-2 focus:ring-[#0284C7]/20";
@@ -12,10 +12,14 @@ export default function MedicineFilters({
   initial,
   forms,
   specialities,
+  basePath = '/medicines',
+  hideSpeciality = false,
 }: {
   initial: Values;
   forms: { value: string; label: string }[];
   specialities: string[];
+  basePath?: string;
+  hideSpeciality?: boolean;
 }) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
@@ -29,12 +33,11 @@ export default function MedicineFilters({
     const p = new URLSearchParams();
     if (next.q.trim()) p.set('q', next.q.trim());
     if (next.form) p.set('form', next.form);
-    if (next.speciality) p.set('speciality', next.speciality);
-    if (next.condition) p.set('condition', next.condition);
+    if (next.speciality && !hideSpeciality) p.set('speciality', next.speciality);
     if (next.sort) p.set('sort', next.sort);
     if (next.stock) p.set('stock', 'in');
     const s = p.toString();
-    startTransition(() => router.replace(s ? `/medicines?${s}` : '/medicines', { scroll: false }));
+    startTransition(() => router.replace(s ? `${basePath}?${s}` : basePath, { scroll: false }));
   };
 
   const update = (patch: Partial<Values>, debounce = false) => {
@@ -46,12 +49,12 @@ export default function MedicineFilters({
     } else go(next);
   };
 
-  const dirty = v.q || v.form || v.speciality || v.condition || v.stock;
+  const dirty = v.q || v.form || v.speciality || v.stock;
 
   return (
     <form
       onSubmit={(e) => { e.preventDefault(); go(v); }}
-      className="mt-8 grid gap-3 rounded-2xl border border-sky-100 bg-white p-4 shadow-sm sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr_auto] lg:items-center"
+      className={`mt-8 grid gap-3 rounded-2xl border border-sky-100 bg-white p-4 shadow-sm sm:grid-cols-2 lg:items-center ${hideSpeciality ? "lg:grid-cols-[2fr_1fr_1fr_auto]" : "lg:grid-cols-[2fr_1fr_1fr_1fr_auto]"}`}
     >
       <label className="relative block sm:col-span-2 lg:col-span-1">
         <span className="sr-only">Search</span>
@@ -68,10 +71,10 @@ export default function MedicineFilters({
         <option value="">All forms</option>
         {forms.map((f) => <option key={f.value} value={f.value}>{f.label}</option>)}
       </select>
-      <select value={v.speciality} onChange={(e) => update({ speciality: e.target.value })} aria-label="Speciality" className={field}>
+      {!hideSpeciality && <select value={v.speciality} onChange={(e) => update({ speciality: e.target.value })} aria-label="Speciality" className={field}>
         <option value="">All specialities</option>
         {specialities.map((s) => <option key={s} value={s}>{s}</option>)}
-      </select>
+      </select>}
       <select value={v.sort} onChange={(e) => update({ sort: e.target.value })} aria-label="Sort" className={field}>
         <option value="">Relevance</option>
         <option value="name">Name A–Z</option>
@@ -86,18 +89,13 @@ export default function MedicineFilters({
         {dirty ? (
           <button
             type="button"
-            onClick={() => update({ q: '', form: '', speciality: '', condition: '', stock: false })}
+            onClick={() => update({ q: '', form: '', speciality: '', stock: false })}
             className="ml-auto inline-flex cursor-pointer items-center gap-1 rounded-xl border border-sky-200 px-4 py-2.5 text-sm font-semibold text-[#0284C7] transition hover:bg-[#EAF6FF] lg:ml-0"
           >
             <X size={14} /> Clear
           </button>
         ) : null}
       </div>
-      {v.condition && (
-        <p className="text-sm text-[#4B6584] sm:col-span-2 lg:col-span-5">
-          Condition: <strong className="text-[#082F49]">{v.condition}</strong>
-        </p>
-      )}
     </form>
   );
 }

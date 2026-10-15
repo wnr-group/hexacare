@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { conditionIcon } from "@/components/conditions/conditionIcons";
 import * as THREE from "three";
 import {
   ShieldCheck,
@@ -249,16 +250,9 @@ function SpecimenChamber() {
 }
 
 // --- MAIN PAGE COMPONENT ---
-const conditionIcons: Record<string, React.ComponentType<{ size?: number }>> = {
-  Oncology: Dna,
-  Cardiology: Heart,
-  Nephrology: Activity,
-  "Infectious Disease": ShieldCheck,
-  Gynaecology: FlaskConical,
-};
-
 export interface HomeCondition {
   name: string;
+  slug: string;
   available: number;
 }
 
@@ -456,17 +450,17 @@ export default function Homepage({ conditions, featured }: { conditions: HomeCon
             <div className="max-w-[1280px] mx-auto">
               <h2 className="font-display font-bold text-3xl text-[#082F49] mb-10 flex items-center justify-between">
                 Shop by Condition
-                <Link href="/medicines" className="text-sm font-medium text-[#0284C7] flex items-center hover:underline">
+                <Link href="/conditions" className="text-sm font-medium text-[#0284C7] flex items-center hover:underline">
                   View all <ChevronRight size={16} />
                 </Link>
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
                 {conditions.map((cat) => {
-                  const Icon = conditionIcons[cat.name] ?? Pill;
+                  const Icon = conditionIcon(cat.name);
                   return (
                     <Link
                       key={cat.name}
-                      href={`/medicines?condition=${encodeURIComponent(cat.name)}&stock=in`}
+                      href={`/conditions/${cat.slug}`}
                       className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center text-center border border-[#0284C7]/15 hover:border-[#0284C7]/30 hover:shadow-lg hover:-translate-y-1 transition-all group"
                     >
                       <div className="w-12 h-12 rounded-full bg-[#EAF6FF] text-[#0284C7] flex items-center justify-center mb-4 group-hover:bg-[#0284C7] group-hover:text-white transition-colors">

@@ -58,7 +58,6 @@ export interface Query {
   q?: string;
   form?: string;
   speciality?: string;
-  condition?: string;
   stock?: string;
   sort?: string;
   page?: number;
@@ -66,7 +65,7 @@ export interface Query {
 
 export const PAGE_SIZE = 24;
 
-export function searchMedicines({ q, form, speciality, condition, stock, sort, page = 1 }: Query) {
+export function searchMedicines({ q, form, speciality, stock, sort, page = 1 }: Query) {
   const term = q?.trim().toLowerCase();
   let list = medicines.filter(
     (m) =>
@@ -76,7 +75,6 @@ export function searchMedicines({ q, form, speciality, condition, stock, sort, p
         m.manufacturer?.toLowerCase().includes(term)) &&
       (!form || m.dosage_form === form) &&
       (!speciality || m.speciality.includes(speciality)) &&
-      (!condition || m.condition.includes(condition)) &&
       (stock !== "in" || m.in_stock === "available"),
   );
   if (sort === "name") list = [...list].sort((a, b) => a.name.localeCompare(b.name));
@@ -89,15 +87,17 @@ export function searchMedicines({ q, form, speciality, condition, stock, sort, p
 
 export const isAvailable = (m: Medicine) => m.in_stock === "available";
 
-/** Medical conditions ranked by how many medicines are actually in stock. */
-export function conditionStats(limit = 6) {
-  const map = new Map<string, number>();
-  medicines.forEach((m) => {
-    if (!isAvailable(m)) return;
-    m.condition.forEach((c) => c !== "Others" && map.set(c, (map.get(c) ?? 0) + 1));
-  });
-  return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit).map(([name, available]) => ({ name, available }));
-}
+export const specialityStats = (() => {
+  const total = new Map<string, number>();
+  const available = new Map<string, number>();
+  medicines.forEach((m) =>
+    m.speciality.forEach((c) => {
+      total.set(c, (total.get(c) ?? 0) + 1);
+      if (isAvailable(m)) available.set(c, (available.get(c) ?? 0) + 1);
+    }),
+  );
+  return (name: string) => ({ total: total.get(name) ?? 0, available: available.get(name) ?? 0 });
+})();
 
 /** In-stock medicines with photos, best discounts first, one per molecule. */
 export function featuredMedicines(limit = 4) {
