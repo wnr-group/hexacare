@@ -1,3 +1,4 @@
+import "server-only";
 import raw from "@/hexacare_products.json";
 
 export interface Medicine {
@@ -27,7 +28,17 @@ export interface Medicine {
   slug: string;
 }
 
-export const medicines = (raw as unknown as { products: Medicine[] }).products;
+const rawProducts = (raw as unknown as { products: Medicine[] }).products;
+
+// Some products share a slug in the source data. Keep the first as-is and add the
+// product code to later ones so every medicine has its own page.
+const seenSlugs = new Set<string>();
+export const medicines: Medicine[] = rawProducts.map((m) => {
+  let slug = m.slug;
+  if (seenSlugs.has(slug)) slug = `${m.slug}-${m.product_code}`.toLowerCase();
+  seenSlugs.add(slug);
+  return slug === m.slug ? m : { ...m, slug };
+});
 
 const bySlug = new Map(medicines.map((m) => [m.slug, m]));
 export const getMedicine = (slug: string) => bySlug.get(slug);

@@ -5,7 +5,8 @@ import { ArrowLeft, BadgeCheck, Factory, Snowflake, Stethoscope, Globe2 } from "
 import WhatsAppIcon from "@/components/common/WhatsAppIcon";
 import MedicineGallery from "@/components/medicines/MedicineGallery";
 import MedicineCard from "@/components/medicines/MedicineCard";
-import { getMedicine, inr, medicines, stockLabel, titleCase } from "@/lib/medicines";
+import { getMedicine, inr, medicines, specialityStats, stockLabel, titleCase } from "@/lib/medicines";
+import { WHATSAPP_NUMBER } from "@/lib/site";
 
 type Props = { params: Promise<{ slug: string }> };
 
@@ -75,7 +76,7 @@ export default async function MedicineDetailPage({ params }: Props) {
               </p>
               <div className="mt-3 flex flex-wrap gap-2">
                 <a
-                  href={`https://wa.me/919832487454?text=${waText}`}
+                  href={`https://wa.me/${WHATSAPP_NUMBER}?text=${waText}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#25D366] px-3.5 py-2 text-[13px] font-bold text-white shadow-md shadow-emerald-500/25 transition hover:bg-[#1EBE5A] active:scale-[0.98]"
@@ -98,11 +99,17 @@ export default async function MedicineDetailPage({ params }: Props) {
               <div className="mt-6">
                 <h2 className="text-sm font-bold uppercase tracking-wider text-[#082F49]">Used in</h2>
                 <div className="mt-2 flex flex-wrap gap-2">
-                  {[...m.speciality, ...m.condition].map((t) => (
-                    <Link key={t} href={`/medicines?speciality=${encodeURIComponent(t)}`} className="rounded-full border border-sky-200 bg-white px-3 py-1 text-xs font-semibold text-[#0284C7] hover:bg-[#EAF6FF]">
-                      {t}
-                    </Link>
-                  ))}
+                  {[...new Set([...m.speciality, ...m.condition])].map((t) =>
+                    specialityStats(t).total > 0 ? (
+                      <Link key={t} href={`/medicines?speciality=${encodeURIComponent(t)}`} className="rounded-full border border-sky-200 bg-white px-3 py-1 text-xs font-semibold text-[#0284C7] hover:bg-[#EAF6FF]">
+                        {t}
+                      </Link>
+                    ) : (
+                      <span key={t} className="rounded-full border border-sky-100 bg-white px-3 py-1 text-xs font-semibold text-[#4B6584]">
+                        {t}
+                      </span>
+                    ),
+                  )}
                 </div>
               </div>
             )}

@@ -1,6 +1,7 @@
 'use client'
 import React, { useState } from 'react';
 import { X, ArrowRight, Check, MessageSquare } from 'lucide-react';
+import { WHATSAPP_NUMBER } from '@/lib/site';
 
 interface OrderMedicinesModalProps {
   isOpen: boolean;
@@ -31,7 +32,7 @@ export default function OrderMedicinesModal({ isOpen, onClose }: OrderMedicinesM
     setSubmitted(true);
   };
 
-  const whatsappNumber = "919832487454";
+  const whatsappNumber = WHATSAPP_NUMBER;
   const whatsappText = "Hello HexaCare, I am a new customer and I would like to enquire about specialty medicines.";
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(whatsappText)}`;
 
