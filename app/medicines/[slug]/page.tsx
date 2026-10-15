@@ -73,16 +73,16 @@ export default async function MedicineDetailPage({ params }: Props) {
               <p className="mt-1 text-[11px] leading-snug text-[#4B6584] sm:text-xs">
                 {save > 0 ? `You save ${inr(save)} · ` : ""}Per {m.packing ? m.packing.toLowerCase() : "pack"} · Inclusive of taxes
               </p>
-              <div className="mt-3 flex flex-col gap-2 min-[400px]:flex-row">
+              <div className="mt-3 flex flex-wrap gap-2">
                 <a
                   href={`https://wa.me/919832487454?text=${waText}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex flex-1 items-center justify-center gap-2 rounded-lg bg-[#25D366] px-4 py-2.5 text-sm font-bold text-white shadow-md shadow-emerald-500/25 transition hover:bg-[#1EBE5A] active:scale-[0.98]"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-[#25D366] px-3.5 py-2 text-[13px] font-bold text-white shadow-md shadow-emerald-500/25 transition hover:bg-[#1EBE5A] active:scale-[0.98]"
                 >
-                  <WhatsAppIcon size={18} /> Enquire on WhatsApp
+                  <WhatsAppIcon size={16} /> Enquire on WhatsApp
                 </a>
-                <Link href="/contact" className="inline-flex items-center justify-center rounded-lg border border-[#0284C7]/30 bg-[#EAF6FF] px-5 py-2.5 text-sm font-bold text-[#0284C7] transition hover:bg-[#0284C7] hover:text-white">
+                <Link href="/contact" className="inline-flex items-center justify-center rounded-lg border border-[#0284C7]/30 bg-[#EAF6FF] px-3.5 py-2 text-[13px] font-bold text-[#0284C7] transition hover:bg-[#0284C7] hover:text-white">
                   Contact us
                 </Link>
               </div>
