@@ -3,6 +3,7 @@ import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import ConditionCarousel, { type CarouselCondition } from "@/components/conditions/ConditionCarousel";
 import * as THREE from "three";
+import { CapsuleScene, MoleculeSatellites } from "@/components/common/ThreeScenes";
 import {
   ShieldCheck,
   FlaskConical,
@@ -48,8 +49,121 @@ function Reveal({ children, className = "", delay = 0 }: RevealProps) {
       ref={ref}
       style={{ transitionDelay: `${delay}ms` }}
       className={`transition-all duration-1000 ease-out ${
-        visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-10"
+        visible ? "opacity-100 translate-y-0 blur-0 scale-100" : "opacity-0 translate-y-10 blur-[6px] scale-[0.97]"
       } ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
+
+function prefersReducedMotion() {
+  return typeof window !== "undefined" && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+/* Thin brand-coloured bar that fills as the page is scrolled */
+function ScrollProgress() {
+  const barRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      const max = document.documentElement.scrollHeight - window.innerHeight;
+      const p = max > 0 ? window.scrollY / max : 0;
+      if (barRef.current) barRef.current.style.transform = `scaleX(${p})`;
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, []);
+  return (
+    <div className="fixed top-0 left-0 right-0 h-[3px] z-[60] pointer-events-none">
+      <div
+        ref={barRef}
+        className="h-full origin-left bg-gradient-to-r from-[#0284C7] via-[#22D3EE] to-[#0284C7]"
+        style={{ transform: "scaleX(0)" }}
+      />
+    </div>
+  );
+}
+
+/* Moves its children at a different speed than the page for a depth effect */
+function Parallax({ speed = 0.1, className = "", children }: { speed?: number; className?: string; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (prefersReducedMotion()) return;
+    let raf = 0;
+    const update = () => {
+      raf = 0;
+      if (ref.current) ref.current.style.transform = `translate3d(0, ${Math.min(window.scrollY, 900) * speed}px, 0)`;
+    };
+    const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      if (raf) cancelAnimationFrame(raf);
+    };
+  }, [speed]);
+  return <div ref={ref} className={`will-change-transform ${className}`}>{children}</div>;
+}
+
+/* Counts the first number in `value` up from 0 when scrolled into view, e.g. "3500+" or "₹70Cr+" */
+function CountUp({ value }: { value: string }) {
+  const match = /^(\D*?)(\d+)(?!\d*\s*[–-])(.*)$/.exec(value);
+  const [shown, setShown] = useState(0);
+  const ref = useRef<HTMLSpanElement>(null);
+  const target = match ? parseInt(match[2], 10) : 0;
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || !match) return;
+    let raf = 0;
+    const obs = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      obs.disconnect();
+      if (prefersReducedMotion()) { setShown(target); return; }
+      const start = performance.now();
+      const duration = 1800;
+      const tick = (now: number) => {
+        const t = Math.min((now - start) / duration, 1);
+        setShown(Math.round(target * (1 - Math.pow(1 - t, 3))));
+        if (t < 1) raf = requestAnimationFrame(tick);
+      };
+      raf = requestAnimationFrame(tick);
+    }, { threshold: 0.4 });
+    obs.observe(el);
+    return () => { obs.disconnect(); cancelAnimationFrame(raf); };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [target]);
+  if (!match) return <>{value}</>;
+  return <span ref={ref}>{match[1]}{shown}{match[3]}</span>;
+}
+
+/* Card that tilts toward the cursor with a moving highlight */
+function TiltCard({ className = "", children }: { className?: string; children: React.ReactNode }) {
+  const ref = useRef<HTMLDivElement>(null);
+  const onMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const el = ref.current;
+    if (!el || prefersReducedMotion()) return;
+    const r = el.getBoundingClientRect();
+    const x = (e.clientX - r.left) / r.width;
+    const y = (e.clientY - r.top) / r.height;
+    el.style.transform = `perspective(900px) rotateX(${(0.5 - y) * 8}deg) rotateY(${(x - 0.5) * 8}deg) translateZ(0)`;
+    el.style.setProperty("--mx", `${x * 100}%`);
+    el.style.setProperty("--my", `${y * 100}%`);
+  };
+  const onLeave = () => {
+    if (ref.current) ref.current.style.transform = "";
+  };
+  return (
+    <div
+      ref={ref}
+      onMouseMove={onMove}
+      onMouseLeave={onLeave}
+      className={`tilt-card relative transition-transform duration-300 ease-out ${className}`}
     >
       {children}
     </div>
@@ -65,10 +179,10 @@ function IconBadge({ Icon }: { Icon: React.ElementType }) {
 }
 
 const stats = [
-  { icon: Network, value: "3500+", label: "Pin Codes Covered" },
-  { icon: Radar, value: "24 hr", label: "Priority Dispatch" },
-  { icon: Snowflake, value: "Cold-Chain", label: "End-to-End Monitoring" },
-  { icon: Globe2, value: "₹70Cr+", label: "Savings Generated" }
+  { icon: Network, value: "3500+", label: "Pin codes served across India" },
+  { icon: Radar, value: "24 hr", label: "Priority dispatch on every order" },
+  { icon: Snowflake, value: "2–8°C", label: "Temperature held, door to door" },
+  { icon: Globe2, value: "₹70Cr+", label: "Saved for patients and families" }
 ];
 
 function useMoleculeScene(
@@ -259,33 +373,60 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
         @keyframes scan { 0% { top: 0%; opacity: 0; } 10% { opacity: 1; } 90% { opacity: 1; } 100% { top: 100%; opacity: 0; } }
         @keyframes floatSlow { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
         .float-slow { animation: floatSlow 6s ease-in-out infinite; }
+        @keyframes floatSlowAlt { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-8px) rotate(-1.5deg); } }
+        .float-slow-alt { animation: floatSlowAlt 5s ease-in-out infinite; }
+        @keyframes gradientShift { 0% { background-position: 0% 50%; } 100% { background-position: 200% 50%; } }
+        .gradient-text { background: linear-gradient(90deg, #0284C7, #22D3EE, #0284C7); background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent; animation: gradientShift 5s linear infinite; }
+        @keyframes blobDrift { 0%, 100% { transform: translate(0, 0) scale(1); } 33% { transform: translate(40px, -30px) scale(1.08); } 66% { transform: translate(-30px, 25px) scale(0.95); } }
+        .blob-drift { animation: blobDrift 16s ease-in-out infinite; }
+        .blob-drift-b { animation: blobDrift 20s ease-in-out infinite reverse; }
+        @keyframes spinSlow { to { transform: rotate(360deg); } }
+        .spin-slow { animation: spinSlow 40s linear infinite; }
+        .spin-slow-rev { animation: spinSlow 60s linear infinite reverse; }
+        @keyframes ringPulse { 0% { transform: scale(0.9); opacity: 0.5; } 100% { transform: scale(1.25); opacity: 0; } }
+        .ring-pulse { animation: ringPulse 3.5s ease-out infinite; }
+        @keyframes shineSweep { 0% { transform: translateX(-120%) skewX(-20deg); } 60%, 100% { transform: translateX(260%) skewX(-20deg); } }
+        .shine-btn { position: relative; overflow: hidden; }
+        .shine-btn::after { content: ""; position: absolute; top: 0; bottom: 0; left: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent); transform: translateX(-120%) skewX(-20deg); animation: shineSweep 4.5s ease-in-out infinite; pointer-events: none; }
+        .tilt-card::before { content: ""; position: absolute; inset: 0; border-radius: inherit; pointer-events: none; opacity: 0; transition: opacity 300ms; background: radial-gradient(260px circle at var(--mx, 50%) var(--my, 50%), rgba(34,211,238,0.18), transparent 60%); }
+        .tilt-card:hover::before { opacity: 1; }
+        @keyframes fadeUpIn { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+        .hero-in { opacity: 0; animation: fadeUpIn 0.9s cubic-bezier(0.22, 1, 0.36, 1) forwards; }
+        @media (prefers-reduced-motion: reduce) {
+          .float-slow, .float-slow-alt, .gradient-text, .blob-drift, .blob-drift-b, .spin-slow, .spin-slow-rev, .ring-pulse, .shine-btn::after { animation: none !important; }
+          .hero-in { animation: none !important; opacity: 1; }
+        }
       `}</style>
+
+      <ScrollProgress />
 
       <main>
         {/* 1. HERO & SEARCH SECTION */}
         <section className="relative px-6 md:px-16 pt-28 pb-16 md:py-24 overflow-hidden border-b border-[#0284C7]/15 bg-gradient-to-b from-[#CFEBFF] via-[#EAF6FF] to-[#EAF6FF]">
           {/* ambient background glow */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-[#0284C7]/5 rounded-full blur-3xl -z-0" />
+          <div className="blob-drift absolute -top-20 left-[8%] w-[380px] h-[380px] bg-[#22D3EE]/20 rounded-full blur-3xl" />
+          <div className="blob-drift-b absolute bottom-0 right-[6%] w-[440px] h-[440px] bg-[#0284C7]/20 rounded-full blur-3xl" />
 
           <div className="max-w-[1440px] mx-auto relative z-10">
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
 
               {/* LEFT — Male doctor */}
               <div className="hidden lg:flex lg:col-span-3 justify-end items-end h-full">
-                <div className="relative w-full max-w-[300px]">
+                <Parallax speed={0.07} className="hero-in relative w-full max-w-[300px]">
                   <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[260px] h-[260px] bg-[#0284C7]/15 rounded-full blur-3xl -z-10" />
                   <img
                     src="hero_male_doctor.png"
                     alt="Male doctor pointing toward specialty medicine offerings"
-                    className="w-full h-[440px] object-contain object-bottom drop-shadow-2xl"
+                    className="float-slow w-full h-[440px] object-contain object-bottom drop-shadow-2xl"
                   />
-                  <div className="absolute right-2 top-16 bg-white rounded-2xl shadow-lg shadow-[#0284C7]/20 border border-[#0284C7]/10 px-4 py-3 flex items-center gap-2">
+                  <div className="float-slow-alt absolute right-2 top-16 bg-white rounded-2xl shadow-lg shadow-[#0284C7]/20 border border-[#0284C7]/10 px-4 py-3 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-[#22D3EE] animate-pulse" />
                     <span className="font-mono text-[11px] font-semibold text-[#082F49]">
                       GENUINE STOCK
                     </span>
                   </div>
-                </div>
+                </Parallax>
               </div>
 
               {/* CENTER CONTENT */}
@@ -296,7 +437,7 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
                   </span>
                   <h1 className="font-display font-bold text-[40px] leading-[1.1] sm:text-[52px] md:text-[64px] text-[#082F49] mb-6 tracking-tight max-w-4xl mx-auto">
                     Super specialty medicine, <br />
-                    <span className="text-[#0284C7]">delivered direct</span> to you.
+                    <span className="gradient-text">delivered direct</span> to you.
                   </h1>
                 </Reveal>
                 
@@ -310,11 +451,11 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
                 {/* Quick Actions */}
                 <Reveal delay={450}>
                   <div className="mt-8 flex flex-wrap justify-center gap-4">
-                    <button className="flex items-center gap-2 bg-white text-[#082F49] border border-[#0284C7]/20 px-6 py-3 rounded-full hover:bg-[#EAF6FF] transition-colors font-medium shadow-sm">
+                    <button className="flex items-center gap-2 bg-white text-[#082F49] border border-[#0284C7]/20 px-6 py-3 rounded-full hover:bg-[#EAF6FF] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#0284C7]/20 shine-btn font-medium shadow-sm">
                       <UploadCloud size={18} className="text-[#0284C7]" /> Order via
                       Prescription
                     </button>
-                    <button className="flex items-center gap-2 bg-white text-[#082F49] border border-[#0284C7]/20 px-6 py-3 rounded-full hover:bg-[#EAF6FF] transition-colors font-medium shadow-sm">
+                    <button className="flex items-center gap-2 bg-white text-[#082F49] border border-[#0284C7]/20 px-6 py-3 rounded-full hover:bg-[#EAF6FF] transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-[#0284C7]/20 shine-btn font-medium shadow-sm">
                       <Activity size={18} className="text-[#0284C7]" /> Patient
                       Assistance Program
                     </button>
@@ -324,20 +465,21 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
 
               {/* RIGHT — Female doctor */}
               <div className="hidden lg:flex lg:col-span-3 justify-start items-end h-full">
-                <div className="relative w-full max-w-[300px]">
+                <Parallax speed={0.12} className="hero-in relative w-full max-w-[300px]" >
                   <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[260px] h-[260px] bg-[#0284C7]/15 rounded-full blur-3xl -z-10" />
                   <img
                     src="hero_female_doctor.png"
                     alt="Female doctor pointing toward specialty medicine offerings"
-                    className="w-full h-[440px] object-contain object-bottom drop-shadow-2xl"
+                    style={{ animationDelay: "-3s" }}
+                    className="float-slow w-full h-[440px] object-contain object-bottom drop-shadow-2xl"
                   />
-                  <div className="absolute left-2 top-16 bg-white rounded-2xl shadow-lg shadow-[#0284C7]/20 border border-[#0284C7]/10 px-4 py-3 flex items-center gap-2">
+                  <div style={{ animationDelay: "-2s" }} className="float-slow-alt absolute left-2 top-16 bg-white rounded-2xl shadow-lg shadow-[#0284C7]/20 border border-[#0284C7]/10 px-4 py-3 flex items-center gap-2">
                     <span className="w-2 h-2 rounded-full bg-[#0284C7] animate-pulse" />
                     <span className="font-mono text-[11px] font-semibold text-[#082F49]">
                       GENUINE THERAPIES
                     </span>
                   </div>
-                </div>
+                </Parallax>
               </div>
 
             </div>
@@ -353,16 +495,18 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
                 { icon: Globe2, label: "4,000+ Cities Covered" },
                 { icon: Heart, label: "₹70Cr+ Patient Savings" },
                 { icon: Snowflake, label: "Cold-Chain Integrity" }
-              ].map(({ icon: Icon, label }) =>
-                <div
-                  key={label}
-                  className="flex items-center gap-3 text-[#082F49]"
-                >
-                  <Icon size={24} className="text-[#0284C7]" />
-                  <span className="font-display font-bold text-sm md:text-base tracking-tight">
-                    {label}
-                  </span>
-                </div>
+              ].map(({ icon: Icon, label }, i) =>
+                <Reveal key={label} delay={i * 120}>
+                  <div className="group flex items-center gap-3 text-[#082F49] cursor-default">
+                    <span className="relative flex items-center justify-center w-11 h-11 rounded-full bg-[#0284C7]/10 group-hover:bg-[#0284C7] transition-colors duration-300">
+                      <span className="ring-pulse absolute inset-0 rounded-full border border-[#0284C7]/40" />
+                      <Icon size={22} className="text-[#0284C7] group-hover:text-white group-hover:scale-110 transition-all duration-300" />
+                    </span>
+                    <span className="font-display font-bold text-sm md:text-base tracking-tight">
+                      {label}
+                    </span>
+                  </div>
+                </Reveal>
               )}
             </div>
           </section>
@@ -420,9 +564,7 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
                     color: "bg-purple-500/10 text-purple-600 border-purple-500/15"
                   }
                 ].map((item, idx) => (
-                  <div 
-                    key={idx} 
-                    className="bg-white rounded-3xl p-6 border border-[#0284C7]/10 hover:border-[#0284C7]/30 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between"
+                  <Reveal key={idx} delay={idx * 120} className="h-full"><div className="h-full bg-white rounded-3xl p-6 border border-[#0284C7]/10 hover:border-[#0284C7]/30 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 group flex flex-col justify-between"
                   >
                     <div>
                       <div className={`w-12 h-12 rounded-xl flex items-center justify-center mb-5 border ${item.color} group-hover:scale-105 transition-transform`}>
@@ -432,6 +574,7 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
                       <p className="text-xs sm:text-sm text-[#4B6584] leading-relaxed">{item.desc}</p>
                     </div>
                   </div>
+                  </Reveal>
                 ))}
               </div>
             </div>
@@ -449,8 +592,55 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
 
         {/* 4. FEATURED MEDICINES */}
         <Reveal>
-          <section className="py-20 px-6 md:px-16 bg-white/50 border-y border-[#0284C7]/15">
+          <section className="py-20 px-6 md:px-16 border-y border-[#0284C7]/15">
             <div className="max-w-[1280px] mx-auto">
+              <div className="relative overflow-hidden rounded-[2.5rem] bg-gradient-to-br from-[#082F49] via-[#0A3B5F] to-[#0369A1] shadow-2xl shadow-[#082F49]/30 mb-16">
+                <div className="absolute -top-24 -left-24 w-[420px] h-[420px] rounded-full bg-[#22D3EE]/15 blur-3xl" />
+                <div className="absolute -bottom-32 right-0 w-[520px] h-[520px] rounded-full bg-[#0284C7]/40 blur-3xl" />
+                <div className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(white_1px,transparent_1px),linear-gradient(90deg,white_1px,transparent_1px)] [background-size:44px_44px]" />
+
+                <div className="relative grid grid-cols-1 lg:grid-cols-12 items-center gap-6 lg:gap-0 p-8 sm:p-12 lg:p-16">
+                  <div className="lg:col-span-7 flex flex-col gap-6">
+                    <span className="font-mono text-[11px] tracking-[0.3em] text-[#22D3EE] uppercase font-bold">
+                      Direct from the manufacturer
+                    </span>
+                    <h2 className="font-display font-bold text-3xl sm:text-4xl lg:text-[44px] leading-[1.12] text-white tracking-tight max-w-xl">
+                      Specialty medicines, sourced <span className="text-[#22D3EE]">straight from the maker.</span>
+                    </h2>
+                    <p className="text-[#BFE3F8] text-base sm:text-lg leading-relaxed max-w-xl">
+                      HexaCare brings genuine oncology, nephrology and rare-disorder therapies to your door with no middle channels and no hidden markups. Every batch is verified before it leaves our cold room.
+                    </p>
+                    <ul className="flex flex-col gap-3 mt-1">
+                      {[
+                        "100% genuine, batch-verified stock",
+                        "Held at 2°C to 8°C from dispatch to delivery",
+                        "Direct-to-patient pricing that eases the cost of care",
+                      ].map((point) => (
+                        <li key={point} className="flex items-center gap-3 text-white/90 text-sm sm:text-base">
+                          <span className="shrink-0 w-6 h-6 rounded-full bg-[#22D3EE]/20 border border-[#22D3EE]/40 flex items-center justify-center">
+                            <ShieldCheck size={13} className="text-[#22D3EE]" />
+                          </span>
+                          {point}
+                        </li>
+                      ))}
+                    </ul>
+                    <Link
+                      href="/medicines?stock=in"
+                      className="mt-3 w-fit inline-flex items-center gap-2 bg-white text-[#082F49] px-7 py-3.5 rounded-full font-semibold hover:bg-[#22D3EE] transition-colors shadow-lg"
+                    >
+                      Browse all medicines <ChevronRight size={18} />
+                    </Link>
+                  </div>
+
+                  <div className="lg:col-span-5 relative h-[340px] sm:h-[420px] lg:h-[480px]">
+                    <div className="spin-slow absolute inset-4 rounded-full border border-dashed border-white/20" />
+                    <div className="spin-slow-rev absolute inset-14 rounded-full border border-[#22D3EE]/25" />
+                    <div className="ring-pulse absolute inset-10 rounded-full border border-[#22D3EE]/40" />
+                    <CapsuleScene />
+                  </div>
+                </div>
+              </div>
+
               <h2 className="font-display font-bold text-3xl text-[#082F49] mb-10 flex items-center justify-between">
                 Available Medicines
                 <Link href="/medicines?stock=in" className="text-sm font-medium text-[#0284C7] flex items-center hover:underline">
@@ -523,45 +713,58 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
             <div className="max-w-[1280px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-16 items-center">
               <div className="lg:col-span-7">
                 <span className="font-mono text-[12px] tracking-[0.2em] text-[#0284C7] font-medium mb-4 block">
-                  DELIVERY INFRASTRUCTURE
+                  DELIVERY YOU CAN TRUST
                 </span>
-                <h2 className="font-display font-bold text-3xl md:text-[40px] text-[#082F49] mb-5 tracking-tight">
-                  Excellence in specialty medicine logistics
+                <h2 className="font-display font-bold text-3xl md:text-[40px] leading-tight text-[#082F49] mb-5 tracking-tight">
+                  From manufacturer to your doorstep, never off the cold chain
                 </h2>
                 <p className="text-[#4B6584] text-lg leading-relaxed max-w-xl mb-10">
-                  Our robust cold-chain network ensures temperature-sensitive
-                  treatments reach your doorstep with absolute integrity, speed,
-                  and reliability &mdash; monitored end to end.
+                  Biologics and oncology therapies lose potency when temperatures drift. HexaCare packs every order in insulated bio-packaging, tracks it live, and hands it over intact, wherever you are in India.
                 </p>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  {stats.map(({ icon: Icon, value, label }) => (
+                  {stats.map(({ icon: Icon, value, label }, i) => (
+                    <Reveal key={label} delay={i * 120}>
+                    <TiltCard className="h-full">
                     <div
-                      key={label}
-                      className="group bg-white/70 backdrop-blur-md border border-[#0284C7]/10 p-6 rounded-2xl hover:-translate-y-1 hover:shadow-lg hover:shadow-[#0284C7]/10 transition-all duration-500"
+                      className="group h-full bg-white/70 backdrop-blur-md border border-[#0284C7]/10 p-6 rounded-2xl hover:-translate-y-1 hover:shadow-lg hover:shadow-[#0284C7]/10 transition-all duration-500"
                     >
                       <IconBadge Icon={Icon} />
                       <div className="font-display font-bold text-2xl text-[#0284C7] mt-4">
-                        {value}
+                        <CountUp value={value} />
                       </div>
                       <div className="text-[#082F49] font-semibold text-sm mt-1">
                         {label}
                       </div>
                     </div>
+                    </TiltCard>
+                    </Reveal>
                   ))}
                 </div>
               </div>
 
               <div className="lg:col-span-5">
-                <div className="relative">
-                  <div className="absolute -inset-4 rounded-[2rem] bg-gradient-to-br from-[#0284C7]/15 via-transparent to-[#22D3EE]/15 blur-2xl -z-10" />
+                <div className="relative max-w-md mx-auto lg:max-w-none">
+                  <div className="absolute -inset-6 rounded-[3rem] bg-gradient-to-br from-[#0284C7]/20 via-transparent to-[#22D3EE]/20 blur-2xl -z-10" />
+                  <div className="relative aspect-[4/5] rounded-[2.5rem] overflow-hidden bg-gradient-to-b from-[#082F49] via-[#0A3B5F] to-[#04202F] border border-white/60 shadow-2xl shadow-[#082F49]/30">
+                    <div className="absolute inset-0 opacity-[0.07] [background-image:linear-gradient(white_1px,transparent_1px),linear-gradient(90deg,white_1px,transparent_1px)] [background-size:40px_40px]" />
+                    <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[75%] aspect-square rounded-full bg-[#0284C7]/30 blur-3xl" />
+                    <div className="spin-slow absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[85%] aspect-square rounded-full border border-dashed border-white/20" />
+                    <div className="ring-pulse absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[70%] aspect-square rounded-full border border-[#22D3EE]/40" />
+                    <MoleculeSatellites />
 
-                  <div className="relative rounded-3xl border border-[#0284C7]/15 shadow-xl shadow-[#0284C7]/15 overflow-hidden bg-white/50 backdrop-blur-sm">
-                    <img
-                      src="logistic_image.png"
-                      alt="Cold-chain logistics infrastructure"
-                      className="w-full h-full object-cover aspect-[4/3]"
-                    />
+                    <div className="float-slow-alt absolute top-5 left-5 flex items-center gap-2 px-3.5 py-2 bg-white/10 backdrop-blur-md rounded-full border border-white/20">
+                      <span className="w-2 h-2 rounded-full bg-[#22D3EE] animate-pulse" />
+                      <span className="text-white font-mono text-[10px] tracking-widest font-bold">TEMPERATURE: 2&ndash;8&deg;C</span>
+                    </div>
+                    <div className="float-slow absolute bottom-5 left-5 right-5 flex items-center gap-3 p-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20">
+                      <div className="shrink-0 w-10 h-10 rounded-xl bg-[#22D3EE]/20 flex items-center justify-center">
+                        <ShieldCheck size={20} className="text-[#22D3EE]" />
+                      </div>
+                      <p className="text-white text-sm leading-snug">
+                        <span className="font-bold">Potency protected.</span> <span className="text-white/75">Every dose arrives as the manufacturer intended.</span>
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -603,9 +806,10 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
                       "Genuine products, massive discounts, and direct manufacturer sourcing. I no longer worry about the authenticity of my mother's daily treatments."
                   }
                 ].map((rev, i) =>
+                  <Reveal key={i} delay={i * 150} className="h-full">
+                  <TiltCard className="h-full">
                   <div
-                    key={i}
-                    className="bg-white/10 p-8 rounded-2xl border border-white/20 hover:bg-white/15 transition-colors"
+                    className="h-full bg-white/10 p-8 rounded-2xl border border-white/20 hover:bg-white/15 transition-colors"
                   >
                     <div className="flex gap-1 text-[#22D3EE] mb-4">
                       {[1, 2, 3, 4, 5].map(s =>
@@ -629,6 +833,8 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
                       </div>
                     </div>
                   </div>
+                  </TiltCard>
+                  </Reveal>
                 )}
               </div>
             </div>

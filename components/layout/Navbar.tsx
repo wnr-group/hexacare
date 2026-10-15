@@ -9,7 +9,6 @@ import OrderMedicinesModal from '@/components/products/OrderMedicinesModal';
 const navLinks = [
   { name: 'Home', href: '/' },
   { name: 'About', href: '/about' },
-  { name: 'Products', href: '/product' },
   { name: 'Medicines', href: '/medicines' },
   { name: 'Contact Us', href: '/contact' },
 ];
