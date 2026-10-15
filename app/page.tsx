@@ -2,19 +2,15 @@ import HomeClient from "@/components/home/HomeClient";
 import MedicineCard from "@/components/medicines/MedicineCard";
 import { conditions } from "@/lib/conditions";
 import { conditionImage } from "@/lib/conditionImages";
-import { featuredMedicines, specialityStats } from "@/lib/medicines";
+import { featuredMedicines } from "@/lib/medicines";
 
-const topConditions = () =>
-  conditions
-    .filter((c) => c.name !== "Others")
-    .map((c) => ({ ...c, available: specialityStats(c.name).available, image: conditionImage(c.slug) }))
-    .sort((a, b) => b.available - a.available)
-    .slice(0, 6);
+const allConditions = () =>
+  [...conditions].sort((a, b) => a.name.localeCompare(b.name)).map((c) => ({ ...c, image: conditionImage(c.slug) }));
 
 export default function Page() {
   return (
     <HomeClient
-      conditions={topConditions()}
+      conditions={allConditions()}
       featured={featuredMedicines(4).map((m) => <MedicineCard key={m.id} m={m} />)}
     />
   );

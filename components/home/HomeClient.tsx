@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import ConditionCard from "@/components/conditions/ConditionCard";
+import ConditionCarousel, { type CarouselCondition } from "@/components/conditions/ConditionCarousel";
 import * as THREE from "three";
 import {
   ShieldCheck,
@@ -250,13 +250,7 @@ function SpecimenChamber() {
 }
 
 // --- MAIN PAGE COMPONENT ---
-export interface HomeCondition {
-  name: string;
-  slug: string;
-  image?: string;
-}
-
-export default function Homepage({ conditions, featured }: { conditions: HomeCondition[]; featured: React.ReactNode }) {
+export default function Homepage({ conditions, featured }: { conditions: CarouselCondition[]; featured: React.ReactNode }) {
   return (
     <div
       className="min-h-screen bg-[#EAF6FF] text-[#0B2545] overflow-x-clip"
@@ -448,15 +442,7 @@ export default function Homepage({ conditions, featured }: { conditions: HomeCon
         <Reveal>
           <section className="py-20 px-6 md:px-16">
             <div className="max-w-[1280px] mx-auto">
-              <h2 className="font-display font-bold text-3xl text-[#082F49] mb-10 flex items-center justify-between">
-                Shop by Condition
-                <Link href="/conditions" className="text-sm font-medium text-[#0284C7] flex items-center hover:underline">
-                  View all <ChevronRight size={16} />
-                </Link>
-              </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-                {conditions.map((cat) => <ConditionCard key={cat.slug} name={cat.name} slug={cat.slug} image={cat.image} />)}
-              </div>
+              <ConditionCarousel conditions={conditions} />
             </div>
           </section>
         </Reveal>
