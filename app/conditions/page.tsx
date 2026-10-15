@@ -1,7 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { ArrowUpRight } from "lucide-react";
-import { conditionIcon } from "@/components/conditions/conditionIcons";
+import ConditionCard from "@/components/conditions/ConditionCard";
 import { conditions } from "@/lib/conditions";
 
 export const metadata: Metadata = {
@@ -21,23 +19,8 @@ export default function ConditionsPage() {
       </section>
 
       <section className="px-6 py-10 sm:px-10 lg:px-16">
-        <div className="mx-auto grid max-w-7xl grid-cols-1 gap-4 min-[480px]:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-          {conditions.map((c) => {
-            const Icon = conditionIcon(c.name);
-            return (
-              <Link
-                key={c.slug}
-                href={`/conditions/${c.slug}`}
-                className="group flex items-center gap-4 rounded-2xl border border-sky-100 bg-white p-4 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-[#0284C7]/40 hover:shadow-xl hover:shadow-sky-500/10"
-              >
-                <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-[#EAF6FF] text-[#0284C7] transition-colors group-hover:bg-[#0284C7] group-hover:text-white">
-                  <Icon size={22} />
-                </span>
-                <span className="min-w-0 flex-1 truncate font-bold text-[#082F49]">{c.name}</span>
-                <ArrowUpRight size={18} className="shrink-0 text-slate-300 transition group-hover:text-[#0284C7]" />
-              </Link>
-            );
-          })}
+        <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+          {conditions.map((c) => <ConditionCard key={c.slug} name={c.name} slug={c.slug} />)}
         </div>
       </section>
     </div>

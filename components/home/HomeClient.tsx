@@ -1,7 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { conditionIcon } from "@/components/conditions/conditionIcons";
+import ConditionCard from "@/components/conditions/ConditionCard";
 import * as THREE from "three";
 import {
   ShieldCheck,
@@ -453,22 +453,8 @@ export default function Homepage({ conditions, featured }: { conditions: HomeCon
                   View all <ChevronRight size={16} />
                 </Link>
               </h2>
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                {conditions.map((cat) => {
-                  const Icon = conditionIcon(cat.name);
-                  return (
-                    <Link
-                      key={cat.name}
-                      href={`/conditions/${cat.slug}`}
-                      className="bg-white rounded-2xl p-6 flex flex-col items-center justify-center text-center border border-[#0284C7]/15 hover:border-[#0284C7]/30 hover:shadow-lg hover:-translate-y-1 transition-all group"
-                    >
-                      <div className="w-12 h-12 rounded-full bg-[#EAF6FF] text-[#0284C7] flex items-center justify-center mb-4 group-hover:bg-[#0284C7] group-hover:text-white transition-colors">
-                        <Icon size={24} />
-                      </div>
-                      <span className="font-semibold text-[#082F49] text-sm">{cat.name}</span>
-                    </Link>
-                  );
-                })}
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
+                {conditions.map((cat) => <ConditionCard key={cat.slug} name={cat.name} slug={cat.slug} />)}
               </div>
             </div>
           </section>
