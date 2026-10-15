@@ -58,6 +58,7 @@ export interface Query {
   q?: string;
   form?: string;
   speciality?: string;
+  condition?: string;
   stock?: string;
   sort?: string;
   page?: number;
@@ -65,7 +66,7 @@ export interface Query {
 
 export const PAGE_SIZE = 24;
 
-export function searchMedicines({ q, form, speciality, stock, sort, page = 1 }: Query) {
+export function searchMedicines({ q, form, speciality, condition, stock, sort, page = 1 }: Query) {
   const term = q?.trim().toLowerCase();
   let list = medicines.filter(
     (m) =>
@@ -75,6 +76,7 @@ export function searchMedicines({ q, form, speciality, stock, sort, page = 1 }: 
         m.manufacturer?.toLowerCase().includes(term)) &&
       (!form || m.dosage_form === form) &&
       (!speciality || m.speciality.includes(speciality)) &&
+      (!condition || m.condition.includes(condition)) &&
       (stock !== "in" || m.in_stock === "available"),
   );
   if (sort === "name") list = [...list].sort((a, b) => a.name.localeCompare(b.name));
@@ -83,4 +85,31 @@ export function searchMedicines({ q, form, speciality, stock, sort, page = 1 }: 
   const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
   const current = Math.min(Math.max(1, page), pages);
   return { total: list.length, pages, current, items: list.slice((current - 1) * PAGE_SIZE, current * PAGE_SIZE) };
+}
+
+export const isAvailable = (m: Medicine) => m.in_stock === "available";
+
+/** Medical conditions ranked by how many medicines are actually in stock. */
+export function conditionStats(limit = 6) {
+  const map = new Map<string, number>();
+  medicines.forEach((m) => {
+    if (!isAvailable(m)) return;
+    m.condition.forEach((c) => c !== "Others" && map.set(c, (map.get(c) ?? 0) + 1));
+  });
+  return [...map.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit).map(([name, available]) => ({ name, available }));
+}
+
+/** In-stock medicines with photos, best discounts first, one per molecule. */
+export function featuredMedicines(limit = 4) {
+  const seen = new Set<string>();
+  return medicines
+    .filter((m) => isAvailable(m) && m.image && m.price && m.discount_percent)
+    .sort((a, b) => (b.discount_percent ?? 0) - (a.discount_percent ?? 0))
+    .filter((m) => {
+      const key = m.molecule ?? m.id;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, limit);
 }

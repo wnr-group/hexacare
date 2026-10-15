@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ChevronLeft, ChevronRight, SearchX } from "lucide-react";
 import MedicineFilters from "@/components/medicines/MedicineFilters";
 import MedicineCard from "@/components/medicines/MedicineCard";
-import { dosageForms, medicines, searchMedicines, specialities, titleCase } from "@/lib/medicines";
+import { dosageForms, searchMedicines, specialities, titleCase } from "@/lib/medicines";
 
 export const metadata: Metadata = {
   title: "Medicines | Hexacare",
@@ -20,6 +20,7 @@ export default async function MedicinesPage({ searchParams }: { searchParams: Pr
     q: one(sp.q),
     form: one(sp.form),
     speciality: one(sp.speciality),
+    condition: one(sp.condition),
     stock: one(sp.stock),
     sort: one(sp.sort),
     page: Number(one(sp.page)) || 1,
@@ -33,7 +34,7 @@ export default async function MedicinesPage({ searchParams }: { searchParams: Pr
     return s ? `/medicines?${s}` : "/medicines";
   };
   const shown = Array.from({ length: pages }, (_, i) => i + 1).filter((n) => n === 1 || n === pages || Math.abs(n - current) <= 1);
-  const filtered = query.q || query.form || query.speciality || query.stock;
+  const filtered = query.q || query.form || query.speciality || query.condition || query.stock;
 
   return (
     <div className="bg-[#F5FAFF]">
@@ -42,11 +43,11 @@ export default async function MedicinesPage({ searchParams }: { searchParams: Pr
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#0284C7]">Medicine Catalogue</p>
           <h1 className="mt-2 text-3xl font-extrabold text-[#082F49] sm:text-4xl lg:text-5xl">Find the right medicine</h1>
           <p className="mt-3 max-w-2xl text-[#4B6584]">
-            {medicines.length.toLocaleString("en-IN")} products from trusted manufacturers. Search by brand, molecule or manufacturer.
+            Products from trusted manufacturers. Search by brand, molecule or manufacturer.
           </p>
 
           <MedicineFilters
-            initial={{ q: query.q ?? "", form: query.form ?? "", speciality: query.speciality ?? "", sort: query.sort ?? "", stock: query.stock === "in" }}
+            initial={{ q: query.q ?? "", form: query.form ?? "", speciality: query.speciality ?? "", condition: query.condition ?? "", sort: query.sort ?? "", stock: query.stock === "in" }}
             forms={dosageForms.map((f) => ({ value: f, label: titleCase(f) }))}
             specialities={specialities}
           />
@@ -55,11 +56,11 @@ export default async function MedicinesPage({ searchParams }: { searchParams: Pr
 
       <section className="px-6 py-10 sm:px-10 lg:px-16">
         <div className="mx-auto max-w-7xl">
-          <div className="mb-6 flex flex-wrap items-center justify-between gap-2 text-sm text-[#4B6584]">
-            <p>
-              <strong className="text-[#082F49]">{total.toLocaleString("en-IN")}</strong> medicines{filtered ? " match your filters" : ""}
+          {filtered && (
+            <p className="mb-6 text-sm text-[#4B6584]">
+              <strong className="text-[#082F49]">{total.toLocaleString("en-IN")}</strong> medicines match your filters
             </p>
-          </div>
+          )}
 
           {items.length ? (
             <div className="grid grid-cols-1 gap-5 min-[480px]:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
