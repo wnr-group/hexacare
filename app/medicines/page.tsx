@@ -48,7 +48,7 @@ export default async function MedicinesPage({ searchParams }: { searchParams: Pr
           <MedicineFilters
             initial={{ q: query.q ?? "", form: query.form ?? "", speciality: query.speciality ?? "", sort: query.sort ?? "", stock: query.stock === "in" }}
             forms={dosageForms.map((f) => ({ value: f, label: titleCase(f) }))}
-            specialities={specialities}
+            specialities={query.speciality && !specialities.includes(query.speciality) ? [query.speciality, ...specialities] : specialities}
           />
         </div>
       </section>

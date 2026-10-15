@@ -15,7 +15,7 @@ import {
   useReducedMotion,
   animate,
 } from "framer-motion";
-import { CapsuleScene, MoleculeSatellites } from "@/components/common/ThreeScenes";
+import { CapsuleScene, MoleculeSatellites, useThreeScene } from "@/components/common/ThreeScenes";
 import {
   ShieldCheck,
   FlaskConical,
@@ -39,6 +39,8 @@ interface RevealProps {
   className?: string;
   delay?: number;
 }
+const MotionLink = motion.create(Link);
+
 function Reveal({ children, className = "", delay = 0 }: RevealProps) {
   return (
     <motion.div
@@ -180,135 +182,67 @@ const stats = [
   { icon: Globe2, value: "₹70Cr+", label: "Saved for patients and families" }
 ];
 
-function useMoleculeScene(
-  containerRef: React.RefObject<HTMLDivElement | null>
-) {
-  useEffect(
-    () => {
-      const container = containerRef.current;
-      if (!container) return;
-      const prefersReduced = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
-      const width = container.clientWidth;
-      const height = container.clientHeight;
+function useMoleculeScene() {
+  return useThreeScene(({ scene, camera, prefersReduced, onCleanup }) => {
+    // Camera sits further back to prevent top/bottom clipping
+    camera.position.z = 18;
 
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000);
+    const group = new THREE.Group();
+    scene.add(group);
 
-      // Positioned camera further back to prevent top/bottom clipping
-      camera.position.z = 18;
+    const blue = new THREE.Color("#0284C7");
+    const cyan = new THREE.Color("#22D3EE");
+    const white = new THREE.Color("#ffffff");
+    const pointsCount = 40;
+    const radius = 2.1;
+    const heightStep = 0.32;
+    const rotationStep = 0.24;
 
-      const renderer = new THREE.WebGLRenderer({
-        alpha: true,
-        antialias: true
-      });
-      renderer.setSize(width, height);
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      container.appendChild(renderer.domElement);
+    const sphereGeom = new THREE.SphereGeometry(0.12, 24, 24);
+    const cylinderGeom = new THREE.CylinderGeometry(0.016, 0.016, radius * 2, 12);
+    const mat1 = new THREE.MeshPhongMaterial({ color: blue, emissive: blue, emissiveIntensity: 0.5, shininess: 140, specular: white });
+    const mat2 = new THREE.MeshPhongMaterial({ color: cyan, emissive: cyan, emissiveIntensity: 0.6, shininess: 120, specular: white });
+    const rungMat = new THREE.MeshPhongMaterial({ color: "#BFE6FF", transparent: true, opacity: 0.35 });
 
-      const group = new THREE.Group();
-      scene.add(group);
+    for (let i = 0; i < pointsCount; i++) {
+      const y = (i - pointsCount / 2) * heightStep;
+      const angle = i * rotationStep;
+      const b1 = new THREE.Mesh(sphereGeom, mat1);
+      b1.position.set(Math.cos(angle) * radius, y, Math.sin(angle) * radius);
+      group.add(b1);
+      const b2 = new THREE.Mesh(sphereGeom, mat2);
+      b2.position.set(Math.cos(angle + Math.PI) * radius, y, Math.sin(angle + Math.PI) * radius);
+      group.add(b2);
+      const rung = new THREE.Mesh(cylinderGeom, rungMat);
+      rung.position.set(0, y, 0);
+      rung.rotation.z = Math.PI / 2;
+      rung.rotation.y = -angle;
+      group.add(rung);
+    }
 
-      const blue = new THREE.Color("#0284C7");
-      const cyan = new THREE.Color("#22D3EE");
-      const white = new THREE.Color("#ffffff");
-      const pointsCount = 40;
-      const radius = 2.1;
-      const heightStep = 0.32;
-      const rotationStep = 0.24;
+    scene.add(new THREE.AmbientLight(0xffffff, 0.65));
+    const light1 = new THREE.PointLight(blue, 2.2, 40);
+    light1.position.set(8, 8, 8);
+    scene.add(light1);
+    const light2 = new THREE.PointLight(cyan, 1.8, 40);
+    light2.position.set(-8, -4, 6);
+    scene.add(light2);
 
-      const sphereGeom = new THREE.SphereGeometry(0.12, 24, 24);
-      const cylinderGeom = new THREE.CylinderGeometry(
-        0.016,
-        0.016,
-        radius * 2,
-        12
-      );
-      const mat1 = new THREE.MeshPhongMaterial({
-        color: blue,
-        emissive: blue,
-        emissiveIntensity: 0.5,
-        shininess: 140,
-        specular: white
-      });
-      const mat2 = new THREE.MeshPhongMaterial({
-        color: cyan,
-        emissive: cyan,
-        emissiveIntensity: 0.6,
-        shininess: 120,
-        specular: white
-      });
-      const rungMat = new THREE.MeshPhongMaterial({
-        color: "#BFE6FF",
-        transparent: true,
-        opacity: 0.35
-      });
+    let mouseX = 0;
+    let mouseY = 0;
+    const handleMove = (e: MouseEvent) => {
+      mouseX = (e.clientX / window.innerWidth - 0.5) * 0.35;
+      mouseY = (e.clientY / window.innerHeight - 0.5) * 0.35;
+    };
+    window.addEventListener("mousemove", handleMove);
+    onCleanup(() => window.removeEventListener("mousemove", handleMove));
 
-      for (let i = 0; i < pointsCount; i++) {
-        const y = (i - pointsCount / 2) * heightStep;
-        const angle = i * rotationStep;
-        const x1 = Math.cos(angle) * radius;
-        const z1 = Math.sin(angle) * radius;
-        const b1 = new THREE.Mesh(sphereGeom, mat1);
-        b1.position.set(x1, y, z1);
-        group.add(b1);
-        const x2 = Math.cos(angle + Math.PI) * radius;
-        const z2 = Math.sin(angle + Math.PI) * radius;
-        const b2 = new THREE.Mesh(sphereGeom, mat2);
-        b2.position.set(x2, y, z2);
-        group.add(b2);
-        const rung = new THREE.Mesh(cylinderGeom, rungMat);
-        rung.position.set(0, y, 0);
-        rung.rotation.z = Math.PI / 2;
-        rung.rotation.y = -angle;
-        group.add(rung);
-      }
-
-      scene.add(new THREE.AmbientLight(0xffffff, 0.65));
-      const light1 = new THREE.PointLight(blue, 2.2, 40);
-      light1.position.set(8, 8, 8);
-      scene.add(light1);
-      const light2 = new THREE.PointLight(cyan, 1.8, 40);
-      light2.position.set(-8, -4, 6);
-      scene.add(light2);
-
-      let mouseX = 0,
-        mouseY = 0;
-      const handleMove = (e: MouseEvent) => {
-        mouseX = (e.clientX / window.innerWidth - 0.5) * 0.35;
-        mouseY = (e.clientY / window.innerHeight - 0.5) * 0.35;
-      };
-      window.addEventListener("mousemove", handleMove);
-
-      let raf: number;
-      function animate() {
-        raf = requestAnimationFrame(animate);
-        group.rotation.y += prefersReduced ? 0.0015 : 0.0065;
-        group.rotation.x += (mouseY - group.rotation.x) * 0.05;
-        group.rotation.z += (mouseX - group.rotation.z) * 0.05;
-        renderer.render(scene, camera);
-      }
-      animate();
-
-      const handleResize = () => {
-        camera.aspect = container.clientWidth / container.clientHeight;
-        camera.updateProjectionMatrix();
-        renderer.setSize(container.clientWidth, container.clientHeight);
-      };
-      window.addEventListener("resize", handleResize);
-
-      return () => {
-        cancelAnimationFrame(raf);
-        window.removeEventListener("mousemove", handleMove);
-        window.removeEventListener("resize", handleResize);
-        renderer.dispose();
-        if (container.contains(renderer.domElement))
-          container.removeChild(renderer.domElement);
-      };
-    },
-    [containerRef]
-  );
+    return () => {
+      group.rotation.y += prefersReduced ? 0.0015 : 0.0065;
+      group.rotation.x += (mouseY - group.rotation.x) * 0.05;
+      group.rotation.z += (mouseX - group.rotation.z) * 0.05;
+    };
+  });
 }
 
 const readouts = [
@@ -318,8 +252,7 @@ const readouts = [
 ];
 
 function SpecimenChamber() {
-  const ref = useRef<HTMLDivElement>(null);
-  useMoleculeScene(ref);
+  const ref = useMoleculeScene();
   const [activeReadout, setActiveReadout] = useState(0);
 
   useEffect(() => {
@@ -423,16 +356,16 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
                 {/* Quick Actions */}
                 <Reveal delay={450}>
                   <div className="mt-8 flex flex-wrap justify-center gap-4">
-                    <motion.button whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="flex items-center gap-2 bg-white text-[#082F49] border border-[#0284C7]/20 px-6 py-3 rounded-full hover:bg-[#EAF6FF] transition-shadow duration-300 hover:shadow-lg hover:shadow-[#0284C7]/20 relative overflow-hidden font-medium shadow-sm">
+                    <MotionLink href="/contact" whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="flex items-center gap-2 bg-white text-[#082F49] border border-[#0284C7]/20 px-6 py-3 rounded-full hover:bg-[#EAF6FF] transition-shadow duration-300 hover:shadow-lg hover:shadow-[#0284C7]/20 relative overflow-hidden font-medium shadow-sm">
                       <ShineSweep />
                       <UploadCloud size={18} className="text-[#0284C7]" /> Order via
                       Prescription
-                    </motion.button>
-                    <motion.button whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="flex items-center gap-2 bg-white text-[#082F49] border border-[#0284C7]/20 px-6 py-3 rounded-full hover:bg-[#EAF6FF] transition-shadow duration-300 hover:shadow-lg hover:shadow-[#0284C7]/20 relative overflow-hidden font-medium shadow-sm">
+                    </MotionLink>
+                    <MotionLink href="/contact" whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="flex items-center gap-2 bg-white text-[#082F49] border border-[#0284C7]/20 px-6 py-3 rounded-full hover:bg-[#EAF6FF] transition-shadow duration-300 hover:shadow-lg hover:shadow-[#0284C7]/20 relative overflow-hidden font-medium shadow-sm">
                       <ShineSweep />
                       <Activity size={18} className="text-[#0284C7]" /> Patient
                       Assistance Program
-                    </motion.button>
+                    </MotionLink>
                   </div>
                 </Reveal>
               </div>

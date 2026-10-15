@@ -54,7 +54,7 @@ function BranchGallery({ city, photos, dark }: { city: string; photos: BranchPho
   useEffect(() => {
     const el = box.current;
     if (!el) return;
-    const obs = new IntersectionObserver(([e]) => setInView(e.isIntersecting), { threshold: 0.3 });
+    const obs = new IntersectionObserver(([e]) => setInView(e.intersectionRatio >= 0.3), { threshold: 0.3 });
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
@@ -63,13 +63,16 @@ function BranchGallery({ city, photos, dark }: { city: string; photos: BranchPho
     "absolute top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#041B2D]/55 backdrop-blur-md border border-white/20 text-white flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover/gal:opacity-100 focus-visible:opacity-100 hover:bg-[#041B2D]/80 transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#22D3EE]";
 
   return (
-    <div className="-mx-6 -mt-6 mb-5" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="-mx-6 -mt-6 mb-5"
+      onClick={(e) => e.stopPropagation()}
+      onMouseEnter={() => setHold(true)}
+      onMouseLeave={() => setHold(false)}
+      onFocus={() => setHold(true)}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHold(false); }}
+    >
       <div
         ref={box}
-        onMouseEnter={() => setHold(true)}
-        onMouseLeave={() => setHold(false)}
-        onFocus={() => setHold(true)}
-        onBlur={() => setHold(false)}
         className="group/gal relative aspect-[16/10] overflow-hidden rounded-t-[1.75rem] bg-[#06263B]"
       >
         {photos.map((p, idx) => (

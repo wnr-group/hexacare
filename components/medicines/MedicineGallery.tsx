@@ -16,12 +16,10 @@ export default function MedicineGallery({ images, alt }: { images: string[]; alt
 
   const resetView = () => { setZoom(1); setPos({ x: 0, y: 0 }); };
   const setZ = useCallback((fn: (z: number) => number) => {
-    setZoom((z) => {
-      const n = Math.min(MAX, Math.max(MIN, +fn(z).toFixed(2)));
-      if (n === MIN) setPos({ x: 0, y: 0 });
-      return n;
-    });
-  }, []);
+    const n = Math.min(MAX, Math.max(MIN, +fn(zoom).toFixed(2)));
+    setZoom(n);
+    if (n === MIN) setPos({ x: 0, y: 0 });
+  }, [zoom]);
   const go = useCallback((dir: number) => {
     setActive((a) => (a + dir + images.length) % images.length);
     setZoom(1);

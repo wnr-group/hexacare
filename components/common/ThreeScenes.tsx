@@ -14,7 +14,7 @@ interface ThreeSceneAPI {
 
 type ThreeSceneSetup = (api: ThreeSceneAPI) => (() => void) | void;
 
-function useThreeScene(setupFn: ThreeSceneSetup): React.RefObject<HTMLDivElement | null> {
+export function useThreeScene(setupFn: ThreeSceneSetup): React.RefObject<HTMLDivElement | null> {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -70,19 +70,28 @@ function useThreeScene(setupFn: ThreeSceneSetup): React.RefObject<HTMLDivElement
       cancelAnimationFrame(raf);
       ro.disconnect();
       cleanupFns.forEach((fn) => fn());
+      scene.traverse((o) => {
+        const mesh = o as THREE.Mesh;
+        mesh.geometry?.dispose();
+        const mat = mesh.material;
+        (Array.isArray(mat) ? mat : mat ? [mat] : []).forEach((m) => m.dispose());
+      });
       renderer.dispose();
+      renderer.forceContextLoss();
       if (container.contains(renderer.domElement)) {
         container.removeChild(renderer.domElement);
       }
     };
-  }, [setupFn]);
+    // setupFn is read once on mount; callers pass inline functions
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return containerRef;
 }
 
 /* ---------- 2. Three.js Components ---------- */
 export function CapsuleScene() {
-  const ref = useThreeScene(({ scene, camera }) => {
+  const ref = useThreeScene(({ scene, camera, prefersReduced }) => {
     camera.position.set(0, 0, 11);
 
     const brandBlue = new THREE.Color("#0284C7");
@@ -153,6 +162,7 @@ export function CapsuleScene() {
     const cycleDuration = 6000;
 
     return () => {
+      if (prefersReduced) return;
       const time = Date.now();
       const elapsed = time % cycleDuration;
       const progress = elapsed / cycleDuration;
@@ -194,7 +204,7 @@ export function CapsuleScene() {
 }
 
 export function MoleculeSatellites() {
-  const ref = useThreeScene(({ scene, camera }) => {
+  const ref = useThreeScene(({ scene, camera, prefersReduced }) => {
     camera.position.z = 11;
     const group = new THREE.Group();
     scene.add(group);
@@ -234,6 +244,7 @@ export function MoleculeSatellites() {
     scene.add(pulseLight);
 
     return () => {
+      if (prefersReduced) return;
       const time = Date.now() * 0.001;
       group.rotation.y += 0.005;
       group.rotation.x = Math.sin(time * 0.5) * 0.2;

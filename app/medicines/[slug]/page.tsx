@@ -27,7 +27,7 @@ export default async function MedicineDetailPage({ params }: Props) {
   const images = m.images.length ? m.images : m.image ? [m.image] : [];
   const save = m.mrp && m.price && m.mrp > m.price ? m.mrp - m.price : 0;
   const related = medicines
-    .filter((x) => x.id !== m.id && (m.molecule ? x.molecule === m.molecule : x.speciality[0] === m.speciality[0]))
+    .filter((x) => x.id !== m.id && (m.molecule ? x.molecule === m.molecule : !!m.speciality[0] && x.speciality[0] === m.speciality[0]))
     .slice(0, 4);
   const waText = encodeURIComponent(`Hello Hexacare, I would like to enquire about ${m.name} (Code: ${m.product_code}).`);
 
