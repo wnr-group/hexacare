@@ -1,37 +1,31 @@
 'use client'
-import { createElement, useEffect, useRef, useState } from 'react';
+import { createElement, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { ArrowUpRight } from 'lucide-react';
 import { conditionIcon } from './conditionIcons';
 
-/** Square card with a photo from /public/conditions/<slug>.jpg; falls back to a gradient + icon. */
-export default function ConditionCard({ name, slug }: { name: string; slug: string }) {
+/** Square card with a photo from /public/conditions; falls back to a gradient + icon when there is none. */
+export default function ConditionCard({ name, slug, image }: { name: string; slug: string; image?: string }) {
   const [failed, setFailed] = useState(false);
-  const img = useRef<HTMLImageElement>(null);
-
-  useEffect(() => {
-    const el = img.current;
-    if (el && el.complete && el.naturalWidth === 0) setFailed(true);
-  }, []);
 
   return (
     <Link
       href={`/conditions/${slug}`}
       className="group relative block aspect-square overflow-hidden rounded-2xl bg-gradient-to-br from-[#0284C7] to-[#082F49] shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-sky-500/20"
     >
-      {failed ? (
+      {failed || !image ? (
         <span className="absolute inset-0 flex items-center justify-center text-white/15">
           {createElement(conditionIcon(name), { size: 96, strokeWidth: 1.25 })}
         </span>
       ) : (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          ref={img}
-          src={`/conditions/${slug}.jpg`}
+        <Image
+          src={image}
           alt=""
-          loading="lazy"
+          fill
+          sizes="(min-width: 1280px) 20vw, (min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw"
           onError={() => setFailed(true)}
-          className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          className="object-cover transition-transform duration-700 group-hover:scale-110"
         />
       )}
       <span className="absolute inset-0 bg-gradient-to-t from-[#031A2B]/90 via-[#031A2B]/25 to-transparent" />

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import ConditionCard from "@/components/conditions/ConditionCard";
 import { conditions } from "@/lib/conditions";
+import { conditionImage } from "@/lib/conditionImages";
 
 export const metadata: Metadata = {
   title: "Conditions | Hexacare",
@@ -20,7 +21,7 @@ export default function ConditionsPage() {
 
       <section className="px-6 py-10 sm:px-10 lg:px-16">
         <div className="mx-auto grid max-w-7xl grid-cols-2 gap-3 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-          {conditions.map((c) => <ConditionCard key={c.slug} name={c.name} slug={c.slug} />)}
+          {conditions.map((c) => <ConditionCard key={c.slug} name={c.name} slug={c.slug} image={conditionImage(c.slug)} />)}
         </div>
       </section>
     </div>

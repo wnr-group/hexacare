@@ -4,14 +4,9 @@ All photos are CC0 / Public Domain, sourced via Openverse (openverse.org). Attri
 
 | Condition | Title | Creator | License | Source |
 |---|---|---|---|---|
-| allergy-medication | Dandelion seeds macro shot with skewed white balance | AlfieGrand | cc0 | https://wordpress.org/photos/photo/506217b146/ |
-| alzheimers | Old Elderly | Raul Petri | cc0 | https://stocksnap.io/photo/old-elderly-IFMYT06W5O |
 | anaesthetics | NMCP Anesthesiology Conducts Task Training | NavyMedicine | pdm | https://www.flickr.com/photos/61270229@N05/52000342741 |
-| anemia | Free scientist running blood test |  | cc0 | https://www.rawpixel.com/image/5911631/image-public-domain-medicine-free |
-| anti-cancer | Stratford Ontario ~ Canada ~ Pink Peonies ~ Botanical Garden | Onasill - Bill Badzo - 149 Million Views - Thank Y | pdm | https://www.flickr.com/photos/7156765@N05/51406276702 |
 | antibacterials | NMRC Continues Phase 1 Testing of Diarrhea Vaccine 230127-N-GC612-0024 | NavyMedicine | pdm | https://www.flickr.com/photos/61270229@N05/52665245815 |
 | anticoagulants | Naval Hospital Jacksonville Laboratory 220329-N-QA097-030 | NavyMedicine | pdm | https://www.flickr.com/photos/61270229@N05/52034422303 |
-| antifungal | Mushroom Fungus | Bernard Spragg | cc0 | https://stocksnap.io/photo/mushroom-fungus-IJ0B3RFSXX |
 | antiviral | Cells infected with SARS-CoV-2 | National Institutes of Health (NIH) | pdm | https://www.flickr.com/photos/132318516@N08/52605557618 |
 | arthritis | left right knee-joints Frank Burgess |  | cc0 | https://www.rawpixel.com/image/14015323/photo-image-person-hospital-public-domain |
 | blood-disorder | A New Blood Donation Center ... | JFGryphon | cc0 | https://www.flickr.com/photos/30484128@N03/55138395870 |

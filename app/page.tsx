@@ -1,12 +1,13 @@
 import HomeClient from "@/components/home/HomeClient";
 import MedicineCard from "@/components/medicines/MedicineCard";
 import { conditions } from "@/lib/conditions";
+import { conditionImage } from "@/lib/conditionImages";
 import { featuredMedicines, specialityStats } from "@/lib/medicines";
 
 const topConditions = () =>
   conditions
     .filter((c) => c.name !== "Others")
-    .map((c) => ({ ...c, available: specialityStats(c.name).available }))
+    .map((c) => ({ ...c, available: specialityStats(c.name).available, image: conditionImage(c.slug) }))
     .sort((a, b) => b.available - a.available)
     .slice(0, 6);
 

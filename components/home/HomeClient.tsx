@@ -253,6 +253,7 @@ function SpecimenChamber() {
 export interface HomeCondition {
   name: string;
   slug: string;
+  image?: string;
 }
 
 export default function Homepage({ conditions, featured }: { conditions: HomeCondition[]; featured: React.ReactNode }) {
@@ -454,7 +455,7 @@ export default function Homepage({ conditions, featured }: { conditions: HomeCon
                 </Link>
               </h2>
               <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4">
-                {conditions.map((cat) => <ConditionCard key={cat.slug} name={cat.name} slug={cat.slug} />)}
+                {conditions.map((cat) => <ConditionCard key={cat.slug} name={cat.name} slug={cat.slug} image={cat.image} />)}
               </div>
             </div>
           </section>
