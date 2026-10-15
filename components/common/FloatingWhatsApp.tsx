@@ -1,6 +1,8 @@
 'use client'
+import { WHATSAPP_NUMBER } from '@/lib/site';
+
 const FloatingWhatsApp = () => {
-  const phoneNumber = "919832487454"; 
+  const phoneNumber = WHATSAPP_NUMBER;
   
   // A pre-filled message to make it easier for patients to start the chat
   const message = "Hello HexaCare, I have an inquiry regarding specialty medicines.";

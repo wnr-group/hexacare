@@ -52,11 +52,11 @@ export default function ViewMedicinesModal({
           </div>
           <div className="flex items-center justify-between sm:justify-end gap-3 w-full sm:w-auto shrink-0">
             <Link
-              href="/product"
+              href="/medicines"
               onClick={onClose}
               className="text-xs sm:text-sm font-semibold text-[#0284C7] hover:text-[#075985] flex items-center gap-1 bg-[#EAF6FF] px-3 py-2 rounded-full border border-sky-200 transition-colors"
             >
-              Go to Products Page <ExternalLink size={14} />
+              Go to Medicines Page <ExternalLink size={14} />
             </Link>
             <button
               onClick={onClose}
@@ -149,7 +149,7 @@ export default function ViewMedicinesModal({
             Can&apos;t find a specific medicine? Submit a sourcing request directly.
           </span>
           <Link
-            href="/product#medName"
+            href="/contact"
             onClick={onClose}
             className="w-full sm:w-auto text-center bg-[#0284C7] text-white px-5 py-2.5 rounded-full font-bold hover:bg-[#075985] transition-colors shadow-sm whitespace-nowrap"
           >
