@@ -17,7 +17,7 @@ const btn =
 export function Controls({ playing, progressRef, onToggle, onReplay, onSkip, onSeek }: Props) {
   return (
     <>
-      <div className="absolute right-4 top-20 z-20 flex gap-2 sm:right-8">
+      <div className="absolute right-4 top-4 z-20 flex gap-2 sm:right-8">
         <button type="button" className={btn} onClick={onToggle} aria-label={playing ? "Pause story" : "Play story"}>
           {playing ? <Pause size={14} /> : <Play size={14} />}
         </button>

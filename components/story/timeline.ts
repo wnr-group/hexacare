@@ -65,7 +65,7 @@ export function buildTimeline(s: StoryState) {
   const flyStart = at("discover", 0.68);
   const svcA = sc("services").a;
   const flyEnd = svcA + 0.6;
-  cam(flyStart, flyEnd - flyStart, { px: 14.8, py: 2.9, pz: 10.2, tx: 14.8, ty: 2.2, tz: -1 }, "power2.inOut");
+  cam(flyStart, flyEnd - flyStart, { px: 14.2, py: 3.0, pz: 12.2, tx: 14.2, ty: 2.8, tz: -1 }, "power2.inOut");
   tl.to(s, { phone: 0, duration: 0.3 }, svcA + 0.7);
   tl.to(P, { lookW: 0, duration: 0.3 }, svcA + 0.7);
   tl.set(P, { action: "sitSick" }, svcA + 0.7);
@@ -80,14 +80,14 @@ export function buildTimeline(s: StoryState) {
   const per = (sc("services").a + sc("services").len - 0.6 - pointStart) / 6;
   tl.set(E, { action: "point" }, pointStart - 0.05);
   tl.to(E, { aimX: 14.5, aimY: 3.4, aimZ: -2.2, duration: 0.01 }, pointStart - 0.06);
-  cam(flyEnd, pointStart - flyEnd, { px: 14.2, py: 2.8, pz: 9.8, tx: 14.2, ty: 2.5, tz: -1.5 }, "sine.inOut");
+  cam(flyEnd, pointStart - flyEnd, { px: 14.2, py: 3.0, pz: 11.8, tx: 14.2, ty: 3.0, tz: -1.5 }, "sine.inOut");
   for (let i = 0; i < 6; i++) {
     const t = pointStart + i * per;
     const [cx, cy, cz] = wallCellPos(i);
     tl.to(s.svc, { [i]: 1, duration: 0.6, ease: "back.out(1.8)" }, svcA + 0.5 + i * 0.18);
     tl.set(s, { svcActive: i }, t);
     tl.to(E, { aimX: cx, aimY: cy, aimZ: cz, lookX: cx, lookY: cy, lookZ: cz, duration: per * 0.4, ease: "power2.inOut" }, t);
-    cam(t, per, { px: 14.2 + (cx - 16) * 0.25, py: 2.8 + (cy - 2.9) * 0.2, pz: 9.8 - i * 0.25, tx: 14.2 + (cx - 14.2) * 0.35, ty: 2.5 + (cy - 2.9) * 0.35, tz: cz }, "sine.inOut");
+    cam(t, per, { px: 14.2 + (cx - 16) * 0.25, py: 3.0 + (cy - 2.9) * 0.2, pz: 11.8 - i * 0.25, tx: 14.2 + (cx - 14.2) * 0.35, ty: 3.0 + (cy - 2.9) * 0.3, tz: cz }, "sine.inOut");
   }
   const pointEnd = pointStart + 6 * per;
   tl.set(s, { svcActive: -1 }, pointEnd);

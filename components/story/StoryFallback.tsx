@@ -6,7 +6,7 @@ export function StoryFallback({ reason }: { reason: "reduced-motion" | "no-webgl
   return (
     <section
       aria-label="The Hexacare story"
-      className="relative flex min-h-[100svh] w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-[#082F49] to-[#0B4F7D] px-6 py-24 text-center text-white"
+      className={`relative flex ${reason === "loading" ? "h-full" : "min-h-[100svh]"} w-full flex-col items-center justify-center overflow-hidden bg-gradient-to-b from-[#082F49] to-[#0B4F7D] px-6 py-24 text-center text-white`}
       data-story-fallback={reason}
     >
       <div className="pointer-events-none absolute inset-0 opacity-20 [background-image:radial-gradient(circle_at_30%_20%,#22D3EE_0,transparent_40%),radial-gradient(circle_at_80%_80%,#0284C7_0,transparent_45%)]" />

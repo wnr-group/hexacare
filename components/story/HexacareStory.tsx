@@ -141,7 +141,7 @@ export default function HexacareStory() {
     <section
       ref={sectionRef}
       aria-label="The Hexacare story"
-      className="relative h-[100svh] min-h-[560px] w-full overflow-hidden bg-[#04121F] text-white"
+      className="relative mt-20 h-[calc(100svh-5rem)] min-h-[520px] w-full overflow-hidden bg-[#04121F] text-white"
     >
       {near && mode === "webgl" && (
         <Scene story={story} active={active} lowPower={lowPower} onReady={onReady} />

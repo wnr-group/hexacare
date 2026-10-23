@@ -21,7 +21,7 @@ export function CaptionLayer({ view }: { view: StoryView }) {
   const Icon = svc ? (ICONS[svc.icon] ?? Stethoscope) : null;
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-between px-4 pb-28 pt-24 sm:px-8">
+    <div className="pointer-events-none absolute inset-0 z-10 flex flex-col justify-between px-4 pb-28 pt-16 sm:px-8">
       {/* top region: service card / pipeline / cities */}
       <div className="flex flex-col items-center gap-3">
         {svc && Icon && (
