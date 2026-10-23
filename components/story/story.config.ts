@@ -6,10 +6,11 @@
 
 export type SceneKey =
   | "intro"
-  | "illness"
+  | "diagnosis"
+  | "search"
   | "discover"
   | "services"
-  | "delivery"
+  | "supply"
   | "recovery"
   | "impact"
   | "finale";
@@ -28,59 +29,64 @@ export const storyConfig = {
     },
   },
 
-  tagline: "The right care, delivered.",
+  tagline: "Life-saving medicines, delivered with care.",
 
-  /** Start/end second of each scene (ordered, contiguous). Total ≈ 58s. */
+  /** Shown as a small line at the bottom of the story (prescription medicines). */
+  footnote: "Medicines are supplied on valid prescription.",
+
+  /** Start/end second of each scene (ordered, contiguous). Total ≈ 64s. */
   scenes: {
     intro: [0, 6],
-    illness: [6, 14],
-    discover: [14, 20],
-    services: [20, 30],
-    delivery: [30, 38],
-    recovery: [38, 46],
-    impact: [46, 52],
-    finale: [52, 58],
+    diagnosis: [6, 14],
+    search: [14, 22],
+    discover: [22, 30],
+    services: [30, 42],
+    supply: [42, 50],
+    recovery: [50, 57],
+    impact: [57, 60.5],
+    finale: [60.5, 64],
   } satisfies Record<SceneKey, [number, number]>,
 
   /** Seconds to hold the final CTA before the film loops softly. Set loop:false to end on the CTA. */
   loop: true,
   loopDelay: 7,
-  /** Start playing when the section scrolls into view (it sits below the hero). */
+  /** Start playing when the section scrolls into view. */
   startWhenVisible: true,
 
   /** Captions are real DOM text. Times are in seconds on the master timeline. */
   captions: [
-    { from: 0.8, to: 5.8, text: "The right care, delivered." },
-    { from: 6.6, to: 13.6, text: "When illness makes everyday life hard…" },
-    { from: 14.8, to: 19.6, text: "Hexacare is here to help." },
-    { from: 20.4, to: 22.4, text: "Meet your Hexacare care expert." },
-    { from: 30.4, to: 37.8, text: "Genuine medicine, handled with care, all the way to your door." },
-    { from: 38.8, to: 45.8, text: "Feeling lighter. Feeling like yourself again." },
-    { from: 46.4, to: 51.6, text: "Growing across the south, one community at a time." },
-    { from: 52.6, to: 58, text: "Hexacare. The right care, delivered." },
+    { from: 0.8, to: 5.8, text: "Life-saving medicines, delivered with care." },
+    { from: 6.6, to: 13.4, text: "When treatment needs specialized medicines…" },
+    { from: 14.6, to: 21.6, text: "…finding the right, genuine medicine is the hardest part." },
+    { from: 22.8, to: 29.6, text: "Hexacare, Chennai, since 2015." },
+    { from: 30.4, to: 32.4, text: "Meet your Hexacare pharmacist." },
+    { from: 42.5, to: 49.6, text: "Sourced, checked, stored and dispatched with care." },
+    { from: 50.8, to: 56.8, text: "Care that reaches you." },
+    { from: 57.2, to: 60.2, text: "Growing across Tamil Nadu, one community at a time." },
+    { from: 61.0, to: 64, text: "Life-saving medicines, delivered with care." },
   ],
 
-  /** The six cells of the service honeycomb, in clockwise order from the top. */
+  /** The cells of the service honeycomb, clockwise from the top (max 6). */
   services: [
-    { icon: "stethoscope", title: "Expert guidance", line: "Friendly specialists who explain every step." },
-    { icon: "pill", title: "The right medicine", line: "Genuine therapies, sourced from manufacturers." },
-    { icon: "file-text", title: "Prescription support", line: "We help you get your paperwork in order." },
-    { icon: "snowflake", title: "Cold-chain care", line: "Temperature-aware storage and handling." },
-    { icon: "truck", title: "Doorstep delivery", line: "Careful delivery, right to your home." },
-    { icon: "heart-handshake", title: "Patient assistance", line: "People who stay with you after delivery." },
+    { icon: "ribbon", title: "Cancer care medicines", line: "Specialty therapies for oncology treatment." },
+    { icon: "microscope", title: "Virology medicines", line: "Antiviral medicines, genuinely sourced." },
+    { icon: "heart-pulse", title: "Transplant medicines", line: "Specialty medicines for transplant care." },
+    { icon: "pill", title: "Branded & generic specialty drugs", line: "Options to suit the prescription." },
+    { icon: "shield-check", title: "Genuine, verified supply", line: "Verified sourcing you can trust." },
+    { icon: "truck", title: "Reliable delivery", line: "Careful dispatch to hospitals, clinics and homes." },
   ],
 
-  /** Medicine journey along the hex path (30–34s). */
-  pipeline: ["Prescription", "Pharmacy", "Packing", "Delivery"],
+  /** Medicine journey along the hex path (supply scene). */
+  pipeline: ["Sourcing", "Quality check", "Storage", "Dispatch"],
 
-  /** Branches lit up in the impact scene (hex tile offsets are set in the timeline code). */
-  cities: ["Chennai", "Coimbatore", "Madurai", "Trichy"],
+  /** Lit on the reach map: Chennai HQ (Teynampet) plus the other branches. */
+  cities: ["Chennai (HQ)", "Coimbatore", "Madurai", "Trichy"],
 
-  /** Counters shown in the impact scene — figures taken from the site's trust metrics. */
+  /** Reach counters. Add a "Hospitals served" entry here once you have a verified figure. */
   stats: [
+    { label: "Years since 2015", value: new Date().getFullYear() - 2015, prefix: "", suffix: "" },
     { label: "Branches", value: 4, prefix: "", suffix: "" },
     { label: "Cities covered", value: 4000, prefix: "", suffix: "+" },
-    { label: "Patient savings", value: 70, prefix: "₹", suffix: "Cr+" },
   ],
 
   cta: { label: "Contact us", href: "/contact" },
@@ -92,6 +98,8 @@ export const storyConfig = {
   models: {
     enabled: false,
     patient: "/models/patient.glb",
+    family: "/models/family.glb",
+    doctor: "/models/doctor.glb",
     expert: "/models/expert.glb",
     delivery: "/models/delivery.glb",
   },
@@ -110,6 +118,10 @@ export const storyConfig = {
     stretch: ["stretch"],
     happy: ["happy", "jump"],
     celebrate: ["celebrate", "cheer"],
+    nod: ["nod"],
+    relieved: ["relieved", "relief"],
+    write: ["write", "talk"],
+    phone: ["phone", "idle"],
   } as Record<string, string[]>,
 
   /** Total particles in the intro formation. */

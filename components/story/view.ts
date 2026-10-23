@@ -32,9 +32,9 @@ export function deriveView(t: number, m: Marks): StoryView {
   const impLen = storyConfig.scenes.impact[1] - storyConfig.scenes.impact[0];
   let cities = 0;
   storyConfig.cities.forEach((_, i) => {
-    if (impactOn && t >= m.impactStart + impLen * (0.3 + 0.13 * i) + 0.2) cities = i + 1;
+    if (impactOn && t >= m.impactStart + 0.25 + i * 0.4 + 0.2) cities = i + 1;
   });
-  const p = impactOn ? Math.min(1, Math.max(0, (t - (m.impactStart + impLen * 0.35)) / (impLen * 0.5))) : 0;
+  const p = impactOn ? Math.min(1, Math.max(0, (t - (m.impactStart + 0.4)) / (impLen * 0.65))) : 0;
   const statP = Math.round((1 - Math.pow(1 - p, 3)) * 50) / 50;
 
   return { caption: cap?.text ?? null, service, station, cities, statP, cta: t >= m.finaleStart + 0.8 };

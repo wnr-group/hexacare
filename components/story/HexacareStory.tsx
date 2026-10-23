@@ -89,7 +89,7 @@ export default function HexacareStory() {
         if (veilRef.current) {
           const out = storyConfig.loop ? Math.max(0, (t - (total - fadeLen)) / fadeLen) : 0;
           const inn = Math.max(0, 1 - t / 0.5);
-          veilRef.current.style.opacity = String(Math.min(1, Math.max(out, inn)));
+          veilRef.current.style.opacity = String(Math.min(1, Math.max(out, inn, story.cut)));
         }
         const v = deriveView(t, marksRef.current!);
         const key = viewKey(v);

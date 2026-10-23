@@ -17,6 +17,8 @@ export interface RoleStyle {
   backpack?: string;
   /** hair style: 0 short, 1 long/bun */
   longHair?: boolean;
+  stethoscope?: boolean;
+  glasses?: boolean;
   scale: number;
 }
 
@@ -30,6 +32,30 @@ export const ROLES = {
     pants: "#44566C",
     shoe: "#2B3645",
     scale: 1,
+  },
+  family: {
+    skin: "#D49A78",
+    skinSick: "#B9BEC4",
+    hair: "#2A1B16",
+    shirt: "#E56B8A",
+    shirtSick: "#8794A8",
+    pants: "#3B4A63",
+    shoe: "#2B3645",
+    longHair: true,
+    scale: 0.96,
+  },
+  doctor: {
+    skin: "#B97E5A",
+    skinSick: "#B97E5A",
+    hair: "#1E1713",
+    shirt: "#2FA39A",
+    shirtSick: "#2FA39A",
+    pants: "#2B3A52",
+    shoe: "#FFFFFF",
+    coat: "#F4F8FB",
+    stethoscope: true,
+    glasses: true,
+    scale: 1.04,
   },
   expert: {
     skin: "#C98F6B",

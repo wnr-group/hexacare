@@ -14,7 +14,11 @@ export type Action =
   | "drink"
   | "stretch"
   | "happy"
-  | "celebrate";
+  | "celebrate"
+  | "nod"
+  | "relieved"
+  | "write"
+  | "phone";
 
 export interface CharState {
   /** 0..1 pop-in scale */
@@ -61,7 +65,16 @@ export interface StoryState {
   path: number; // hex path light progress 0..1
   city: number[]; // city tile reveal 0..1
   finale: number; // honeycomb resolves into logo
+  /** floating "not available" tiles drifting apart 0..1 */
+  lost: number;
+  /** guide path lit from home toward the branch 0..1 */
+  guide: number;
+  /** quick dip-to-dark used to hide scene cuts 0..1 */
+  cut: number;
+  rx: { x: number; y: number; z: number; visible: number };
   patient: CharState;
+  family: CharState;
+  doctor: CharState;
   expert: CharState;
   delivery: CharState;
 }
@@ -105,7 +118,13 @@ export const createStoryState = (): StoryState => ({
   path: 0,
   city: [0, 0, 0, 0],
   finale: 0,
-  patient: char({ x: -1.2, z: -2.0, action: "sitSick", seated: 1, tint: 0, visible: 1 }),
+  lost: 0,
+  guide: 0,
+  cut: 0,
+  rx: { x: -16.2, y: 0.8, z: -0.6, visible: 0 },
+  patient: char({ x: -14.6, z: -0.6, ry: -Math.PI / 2, action: "sitSick", seated: 1, tint: 0 }),
+  family: char({ x: -13.4, z: -0.6, ry: -Math.PI / 2, tint: 0.3 }),
+  doctor: char({ x: -17.2, z: -0.6, ry: Math.PI / 2 }),
   expert: char({ x: 12.4, z: 0, ry: 0.5 }),
   delivery: char({ x: 8.2, z: 2.27, ry: Math.PI / 2 }),
 });
@@ -119,6 +138,7 @@ export const LAYOUT = {
   wall: { x: 16, y: 2.9, z: -2.2 },
   impact: { x: 32 },
   intro: { x: 0, y: 31, z: 0 },
+  doctor: { x: -16 },
   /** cell lattice spacing for the floor */
   tile: 1.31,
   /** circumradius of a wall honeycomb cell */

@@ -180,6 +180,40 @@ export function computePose(action: Action, t: number, tint: number, seated: num
       p.talk = 0.6;
       break;
     }
+    case "nod":
+      p.rSX = -0.5;
+      p.rE = -1.1;
+      p.lSX = -0.3;
+      p.lE = -0.8;
+      p.headX = 0.08 + sin(t * 4) * 0.14;
+      break;
+    case "relieved": {
+      const s = (sin(t * 1.1) + 1) / 2;
+      p.rSX = -1.0;
+      p.rE = -1.9;
+      p.rSZ = 0.15;
+      p.lSX = 0.05;
+      p.headX = -0.12;
+      p.lean = -0.05 - 0.03 * s;
+      p.bodyY += 0.02 * s;
+      break;
+    }
+    case "write":
+      p.rSX = -0.9;
+      p.rE = -1.0 + sin(t * 6) * 0.06;
+      p.lSX = -0.6;
+      p.lE = -1.0;
+      p.lean = 0.2;
+      p.headX = 0.5;
+      break;
+    case "phone":
+      p.rSX = -1.15;
+      p.rE = -1.35 + sin(t * 3) * 0.04;
+      p.lSX = -0.4;
+      p.lE = -0.9;
+      p.headX = 0.45 + sin(t * 1.3) * 0.06;
+      p.lean = 0.06;
+      break;
     case "celebrate": {
       const j = Math.abs(sin(t * 3.2 + 1));
       p.bodyY += j * 0.1;

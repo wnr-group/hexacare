@@ -42,6 +42,8 @@ export function Environment({ lowPower }: { lowPower: boolean }) {
   const hemi = useRef<THREE.HemisphereLight>(null);
   const shadows = useRef<THREE.Group>(null);
   const wallMat = useRef<THREE.MeshStandardMaterial>(null);
+  const docWallMat = useRef<THREE.MeshStandardMaterial>(null);
+  const decor = useRef<THREE.MeshBasicMaterial>(null);
   const sofaMat = useRef<THREE.MeshStandardMaterial>(null);
   const windowMat = useRef<THREE.MeshBasicMaterial>(null);
   const lampMat = useRef<THREE.MeshBasicMaterial>(null);
@@ -95,6 +97,8 @@ export function Environment({ lowPower }: { lowPower: boolean }) {
     if (shadows.current) shadows.current.position.set(story.cam.tx, 0.03, story.cam.tz * 0.3);
 
     wallMat.current?.color.copy(lerp3(k.c, k.wallCold, k.wallMid, k.wallWarm, g));
+    if (wallMat.current) docWallMat.current?.color.copy(wallMat.current.color);
+    decor.current?.color.setRGB(0.25, 0.7, 0.95).multiplyScalar(0.5 + g * 1.4);
     sofaMat.current?.color.lerpColors(k.sofaCold, k.sofaWarm, g);
     windowMat.current?.color.lerpColors(k.winCold, k.winWarm, g).multiplyScalar(1 + g * 0.8);
     lampMat.current?.color.setRGB(1, 0.85, 0.55).multiplyScalar(0.15 + g * 2.2);
@@ -198,6 +202,47 @@ export function Environment({ lowPower }: { lowPower: boolean }) {
           ))}
         </group>
       </group>
+
+      {/* ------------------------------------------------ doctor's room */}
+      <group position={[LAYOUT.doctor.x, 0, 0]}>
+        <mesh position={[0.5, 1.7, -3.0]}>
+          <boxGeometry args={[9, 3.4, 0.15]} />
+          <meshStandardMaterial ref={docWallMat} roughness={0.9} />
+        </mesh>
+        {/* hex wall art */}
+        {[[0, 0], [0.7, 0], [-0.7, 0], [0.35, 0.6], [-0.35, 0.6], [0.35, -0.6], [-0.35, -0.6]].map(([x, y], i) => (
+          <mesh key={i} position={[x - 1.8, 2.0 + y, -2.9]} rotation={[Math.PI / 2, 0, 0]}>
+            <cylinderGeometry args={[0.36, 0.36, 0.04, 6]} />
+            <meshBasicMaterial ref={i === 0 ? decor : undefined} color={i % 2 ? C.accent : C.primary} toneMapped={false} />
+          </mesh>
+        ))}
+        <mesh position={[2.2, 1.9, -2.9]}>
+          <planeGeometry args={[1.5, 1.2]} />
+          <meshBasicMaterial color="#cfe3f2" toneMapped={false} />
+        </mesh>
+        {/* desk */}
+        <mesh position={[0, 0.375, -0.6]}>
+          <boxGeometry args={[0.9, 0.75, 1.7]} />
+          <meshStandardMaterial color="#8a6a52" roughness={0.8} />
+        </mesh>
+        {/* patient's chair */}
+        <mesh position={[1.4, 0.23, -0.6]}>
+          <boxGeometry args={[0.55, 0.46, 0.6]} />
+          <meshStandardMaterial color="#5f7893" roughness={0.9} />
+        </mesh>
+        <mesh position={[1.7, 0.72, -0.6]}>
+          <boxGeometry args={[0.08, 0.55, 0.6]} />
+          <meshStandardMaterial color="#5f7893" roughness={0.9} />
+        </mesh>
+      </group>
+
+      {/* ------------------------------------------------ Hexacare store crates */}
+      {[[8.4, 0], [9.5, 0], [8.9, 0.5], [19.6, 0], [20.7, 0], [20.1, 0.5]].map(([x, h], i) => (
+        <mesh key={i} position={[x, 0.3 + h, -1.1]}>
+          <boxGeometry args={[0.9, 0.5, 0.7]} />
+          <meshStandardMaterial color={i % 2 ? "#F4FBFF" : "#BFE3F8"} roughness={0.7} />
+        </mesh>
+      ))}
 
       {/* ------------------------------------------------ street lamps */}
       {[6, 10].map((x) => (

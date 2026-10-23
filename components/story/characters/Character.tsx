@@ -49,7 +49,7 @@ function getBlob() {
 }
 
 interface Props {
-  id: "patient" | "expert" | "delivery";
+  id: "patient" | "family" | "doctor" | "expert" | "delivery";
   role: RoleId;
   modelUrl: string;
 }

@@ -183,6 +183,11 @@ export default function ProceduralRig({ cs, role, story }: Props) {
               </mesh>
             </>
           )}
+          {role.stethoscope && (
+            <mesh position={[0, 0.5, 0.06]} rotation={[Math.PI / 2.2, 0, 0]} material={m.dark}>
+              <torusGeometry args={[0.1, 0.014, 6, 16]} />
+            </mesh>
+          )}
           {role.backpack && (
             <mesh position={[0, 0.3, -0.2]} material={m.backpack}>
               <boxGeometry args={[0.32, 0.38, 0.18]} />
@@ -250,6 +255,15 @@ export default function ProceduralRig({ cs, role, story }: Props) {
                 </mesh>
               ))}
             </group>
+            {role.glasses && (
+              <group position={[0, 0.17, 0.118]}>
+                {([-1, 1] as const).map((s) => (
+                  <mesh key={s} position={[s * 0.045, 0, 0]} material={m.dark}>
+                    <torusGeometry args={[0.028, 0.004, 6, 16]} />
+                  </mesh>
+                ))}
+              </group>
+            )}
             <mesh ref={smile} position={[0, 0.105, 0.113]} material={m.dark}>
               <torusGeometry args={[0.03, 0.005, 6, 14, Math.PI]} />
             </mesh>

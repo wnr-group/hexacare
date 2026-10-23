@@ -177,31 +177,77 @@ export function PainCloud() {
   );
 }
 
-/* ---------------------------------------------------------------- phone + glowing hex over the patient's hand */
-export function PhoneHex() {
+/* ---------------------------------------------------------------- "not available" tiles drifting apart */
+const LOST_COUNT = 9;
+
+export function LostTiles() {
   const story = useStory();
   const g = useRef<THREE.Group>(null);
-  const hex = useRef<THREE.Mesh>(null);
+  const mats = useMemo(
+    () =>
+      Array.from({ length: LOST_COUNT }, () => new THREE.MeshStandardMaterial({ color: "#7C8DA3", roughness: 0.8, transparent: true })),
+    [],
+  );
+  const xMat = useMemo(() => new THREE.MeshBasicMaterial({ color: "#F3F7FB", transparent: true }), []);
   useFrame((state) => {
+    const grp = g.current;
+    if (!grp) return;
     const t = state.clock.elapsedTime;
-    const p = story.phone;
-    if (!g.current) return;
-    g.current.visible = p > 0.01;
-    g.current.scale.setScalar(Math.max(0.001, p));
-    if (hex.current) {
-      hex.current.rotation.y = t * 1.2;
-      hex.current.position.y = 0.33 + Math.sin(t * 2.4) * 0.03;
-    }
+    const p = story.lost;
+    const show = p > 0.005 && p < 1.001;
+    grp.visible = p > 0.005;
+    xMat.opacity = Math.min(1, p * 4);
+    grp.children.forEach((c, i) => {
+      const a = (i / LOST_COUNT) * Math.PI * 2 + 0.5;
+      const spread = 0.7 + p * (2.4 + (i % 3) * 0.6);
+      c.position.set(
+        story.family.x + Math.cos(a) * spread,
+        1.7 + Math.sin(a * 1.7) * 0.5 * p + Math.sin(t * 1.3 + i) * 0.05,
+        story.family.z + Math.sin(a) * spread * 0.6 - 0.4,
+      );
+      c.rotation.set(Math.PI / 2 + Math.sin(t + i) * 0.15, 0, a + t * 0.2 * p);
+      c.scale.setScalar(Math.min(1, p * 5) * (1 - 0.25 * p));
+      mats[i].opacity = show ? 0.95 - 0.45 * p : 0;
+    });
   });
   return (
-    <group ref={g} position={[-1.42, 0.98, -1.62]} rotation={[-0.5, 0, 0]} visible={false}>
+    <group ref={g} visible={false}>
+      {mats.map((m, i) => (
+        <group key={i}>
+          <mesh material={m}>
+            <cylinderGeometry args={[0.22, 0.22, 0.05, 6]} />
+          </mesh>
+          {/* a small cross: this one is not available */}
+          {[Math.PI / 4, -Math.PI / 4].map((r) => (
+            <mesh key={r} position={[0, 0.032, 0]} rotation={[0, r, 0]} material={xMat}>
+              <boxGeometry args={[0.2, 0.01, 0.035]} />
+            </mesh>
+          ))}
+        </group>
+      ))}
+    </group>
+  );
+}
+
+/* ---------------------------------------------------------------- prescription paper */
+export function Prescription() {
+  const story = useStory();
+  const g = useRef<THREE.Group>(null);
+  useFrame(() => {
+    const r = story.rx;
+    if (!g.current) return;
+    g.current.visible = r.visible > 0.5;
+    g.current.position.set(r.x, r.y, r.z);
+  });
+  return (
+    <group ref={g} visible={false} rotation={[-0.3, 0, 0]}>
       <mesh>
-        <boxGeometry args={[0.1, 0.01, 0.2]} />
-        <meshStandardMaterial color="#0b1a28" />
+        <boxGeometry args={[0.22, 0.01, 0.3]} />
+        <meshStandardMaterial color="#FFFFFF" roughness={0.6} />
       </mesh>
-      <mesh ref={hex}>
-        <cylinderGeometry args={[0.1, 0.1, 0.03, 6]} />
-        <meshBasicMaterial color={C.accent} toneMapped={false} />
+      <mesh position={[0, 0.008, -0.1]}>
+        <boxGeometry args={[0.1, 0.004, 0.025]} />
+        <meshBasicMaterial color={C.primary} toneMapped={false} />
       </mesh>
     </group>
   );
@@ -263,22 +309,36 @@ export function Stations() {
             {hexMat}
           </mesh>
           {i === 0 && (
-            <mesh position={[0, 0, 0.03]}>
-              <boxGeometry args={[0.16, 0.2, 0.02]} />
+            <mesh position={[0, 0, 0.05]} rotation={[0.4, 0.5, 0]}>
+              <boxGeometry args={[0.14, 0.14, 0.14]} />
               <meshStandardMaterial color="#fff" />
             </mesh>
           )}
           {i === 1 && (
-            <mesh position={[0, 0, 0.03]}>
-              <boxGeometry args={[0.18, 0.05, 0.02]} />
-              <meshStandardMaterial color={C.deep} />
-            </mesh>
+            <group position={[0, 0, 0.04]}>
+              <mesh>
+                <torusGeometry args={[0.07, 0.016, 8, 18]} />
+                <meshStandardMaterial color={C.deep} />
+              </mesh>
+              <mesh position={[0.07, -0.07, 0]} rotation={[0, 0, Math.PI / 4]}>
+                <boxGeometry args={[0.1, 0.022, 0.022]} />
+                <meshStandardMaterial color={C.deep} />
+              </mesh>
+            </group>
           )}
           {i === 2 && (
-            <mesh position={[0, 0, 0.05]}>
-              <boxGeometry args={[0.16, 0.14, 0.1]} />
-              <meshStandardMaterial color="#fff" />
-            </mesh>
+            <group position={[0, -0.03, 0.05]}>
+              {[-0.08, 0.08].map((x) => (
+                <mesh key={x} position={[x, 0, 0]}>
+                  <boxGeometry args={[0.13, 0.12, 0.12]} />
+                  <meshStandardMaterial color="#fff" />
+                </mesh>
+              ))}
+              <mesh position={[0, 0.12, 0]}>
+                <boxGeometry args={[0.13, 0.12, 0.12]} />
+                <meshStandardMaterial color="#fff" />
+              </mesh>
+            </group>
           )}
           {i === 3 && (
             <mesh position={[0, 0, 0.05]} rotation={[Math.PI / 2, 0, -Math.PI / 2]}>

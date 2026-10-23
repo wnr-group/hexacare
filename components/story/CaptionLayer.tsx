@@ -1,16 +1,17 @@
 "use client";
 import Link from "next/link";
-import { ArrowRight, FileText, HeartHandshake, Pill, Snowflake, Stethoscope, Truck, type LucideIcon } from "lucide-react";
+import { ArrowRight, HeartPulse, Microscope, Pill, Ribbon, ShieldCheck, Stethoscope, Truck, type LucideIcon } from "lucide-react";
 import { storyConfig } from "./story.config";
 import type { StoryView } from "./view";
 
 const ICONS: Record<string, LucideIcon> = {
-  stethoscope: Stethoscope,
+  ribbon: Ribbon,
+  microscope: Microscope,
+  "heart-pulse": HeartPulse,
   pill: Pill,
-  "file-text": FileText,
-  snowflake: Snowflake,
+  "shield-check": ShieldCheck,
   truck: Truck,
-  "heart-handshake": HeartHandshake,
+  stethoscope: Stethoscope,
 };
 
 const glass = "bg-[#082F49]/75 text-white backdrop-blur-md border border-white/15 shadow-lg shadow-[#082F49]/30";
@@ -92,6 +93,9 @@ export function CaptionLayer({ view }: { view: StoryView }) {
           </Link>
         )}
       </div>
+      <p className="pointer-events-none absolute bottom-3 left-4 z-10 max-w-[60%] text-[11px] font-medium text-white/85 [text-shadow:0_1px_3px_rgba(4,18,31,0.8)] sm:left-8">
+        {storyConfig.footnote}
+      </p>
     </div>
   );
 }

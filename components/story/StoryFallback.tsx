@@ -15,7 +15,7 @@ export function StoryFallback({ reason }: { reason: "reduced-motion" | "no-webgl
         <img src={storyConfig.brand.logo} alt="Hexacare" width={96} height={96} className="h-24 w-24" />
         <h2 className="text-3xl font-extrabold sm:text-5xl">{storyConfig.tagline}</h2>
         <p className="max-w-2xl text-lg text-white/80">
-          When illness makes everyday life hard, Hexacare is here to help — from expert guidance to careful delivery at your door.
+          Hexacare Pharmaceuticals, Chennai, since 2015 — genuine cancer care, virology and transplant medicines, plus branded and generic specialty drugs, delivered with care.
         </p>
         <div className="flex items-end justify-center gap-4">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -32,6 +32,7 @@ export function StoryFallback({ reason }: { reason: "reduced-motion" | "no-webgl
           ))}
         </ul>
         <p className="text-sm text-white/70">{storyConfig.cities.join(" · ")}</p>
+        <p className="text-xs text-white/70">{storyConfig.footnote}</p>
         {reason !== "loading" && (
           <Link href={storyConfig.cta.href} className="rounded-full bg-[#22D3EE] px-7 py-3 font-bold text-[#082F49]">
             {storyConfig.cta.label}

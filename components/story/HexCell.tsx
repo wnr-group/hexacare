@@ -41,7 +41,7 @@ function buildFloor(): Cell[] {
   for (let rz = -4; rz <= 13; rz++) {
     const z = rz * ROW_H;
     const off = Math.abs(rz) % 2 === 1 ? D / 2 : 0;
-    for (let cx = -6; cx <= 29; cx++) {
+    for (let cx = -18; cx <= 29; cx++) {
       const x = cx * D + off;
       const onPath = rz === 2 && x >= pathMin - 0.01 && x <= pathMax + 0.01;
       cells.push({
@@ -132,7 +132,10 @@ export function HexCell() {
         else base.lerpColors(tmp.mid, tmp.warm, (g - 0.55) / 0.45);
         base.multiplyScalar(0.92 + 0.1 * cell.hash);
         if (cell.group === "path") {
-          const lit = clamp01((story.path - cell.t * 0.9) * 6);
+          const lit = Math.max(
+            clamp01((story.path - cell.t * 0.9) * 6),
+            clamp01((story.guide - (1 - cell.t) * 0.9) * 6),
+          );
           const wave = 0.5 + 0.5 * Math.sin(t * 3 - cell.t * 8);
           if (lit > 0) {
             y += 0.1 * lit;

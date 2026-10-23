@@ -11,9 +11,11 @@ import { storyConfig } from "./story.config";
 import Environment from "./Environment";
 import HexCell from "./HexCell";
 import Patient from "./characters/Patient";
-import CareExpert from "./characters/CareExpert";
+import HexacareExpert from "./characters/HexacareExpert";
+import Family from "./characters/Family";
+import Doctor from "./characters/Doctor";
 import DeliveryPartner from "./characters/DeliveryPartner";
-import { CityBeams, IntroStage, Medicine, PainCloud, PhoneHex, Stations } from "./Props";
+import { CityBeams, IntroStage, LostTiles, Medicine, PainCloud, Prescription, Stations } from "./Props";
 import { useStory } from "./context";
 
 /** Reads the camera block the GSAP timeline writes; adds portrait pull-back and a gentle handheld drift. */
@@ -73,10 +75,13 @@ export default function Scene({ story, active, lowPower, onReady }: SceneProps) 
           <Stations />
           <CityBeams />
           <PainCloud />
-          <PhoneHex />
+          <LostTiles />
+          <Prescription />
           <Medicine />
           <Patient />
-          <CareExpert />
+          <Family />
+          <Doctor />
+          <HexacareExpert />
           <DeliveryPartner />
         </Suspense>
         {!lowPower && (
