@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import ConditionCarousel, { type CarouselCondition } from "@/components/conditions/ConditionCarousel";
 import * as THREE from "three";
 import {
@@ -40,6 +41,9 @@ interface RevealProps {
   delay?: number;
 }
 const MotionLink = motion.create(Link);
+
+// 3D story section: loaded on the client only, so three/r3f/gsap stay out of the initial bundle
+const HexacareStory = dynamic(() => import("@/components/story/HexacareStory"), { ssr: false });
 
 function Reveal({ children, className = "", delay = 0 }: RevealProps) {
   return (
@@ -391,6 +395,9 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
             </div>
           </div>
         </section>
+
+        {/* HEXACARE STORY — 3D cinematic, lazy-loaded */}
+        <HexacareStory />
 
         {/* 2. TRUST METRICS */}
         <Reveal>
