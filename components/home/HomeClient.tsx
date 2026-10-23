@@ -26,10 +26,8 @@ import {
   Snowflake,
   Radar,
   Search,
-  UploadCloud,
   ShoppingCart,
   Star,
-  Activity,
   Heart,
   Pill,
   ChevronRight
@@ -40,8 +38,6 @@ interface RevealProps {
   className?: string;
   delay?: number;
 }
-const MotionLink = motion.create(Link);
-
 // 3D story section: loaded on the client only, so three/r3f/gsap stay out of the initial bundle
 const HexacareStory = dynamic(() => import("@/components/story/HexacareStory"), { ssr: false });
 
@@ -70,23 +66,6 @@ function ScrollProgress() {
         className="h-full origin-left bg-gradient-to-r from-[#0284C7] via-[#22D3EE] to-[#0284C7]"
       />
     </div>
-  );
-}
-
-/* Fades in on load, then moves at a different speed than the page for a depth effect */
-function Parallax({ speed = 0.1, enterDelay = 0, className = "", children }: { speed?: number; enterDelay?: number; className?: string; children: React.ReactNode }) {
-  const { scrollY } = useScroll();
-  const y = useTransform(scrollY, [0, 900], [0, 900 * speed]);
-  return (
-    <motion.div
-      style={{ y }}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.9, delay: enterDelay }}
-      className={className}
-    >
-      {children}
-    </motion.div>
   );
 }
 
@@ -140,34 +119,6 @@ function TiltCard({ className = "", children }: { className?: string; children: 
         className="absolute inset-0 rounded-[inherit] pointer-events-none"
       />
     </motion.div>
-  );
-}
-
-/* Gradient headline text with a flowing highlight */
-function GradientText({ children }: { children: React.ReactNode }) {
-  const reduced = useReducedMotion();
-  return (
-    <motion.span
-      className="gradient-text"
-      animate={reduced ? undefined : { backgroundPosition: ["0% 50%", "200% 50%"] }}
-      transition={{ duration: 5, repeat: Infinity, ease: "linear" }}
-    >
-      {children}
-    </motion.span>
-  );
-}
-
-/* Light streak that sweeps across a button */
-function ShineSweep() {
-  return (
-    <motion.span
-      aria-hidden
-      className="pointer-events-none absolute inset-y-0 left-0 w-2/5 bg-gradient-to-r from-transparent via-white/70 to-transparent"
-      style={{ skewX: -20 }}
-      initial={{ x: "-120%" }}
-      animate={{ x: "260%" }}
-      transition={{ duration: 1.4, repeat: Infinity, repeatDelay: 3.1, ease: "easeInOut" }}
-    />
   );
 }
 
@@ -310,92 +261,6 @@ export default function Homepage({ conditions, featured }: { conditions: Carouse
       <ScrollProgress />
 
       <main>
-        {/* 1. HERO & SEARCH SECTION */}
-        <section className="relative px-6 md:px-16 pt-28 pb-16 md:py-24 overflow-hidden border-b border-[#0284C7]/15 bg-gradient-to-b from-[#CFEBFF] via-[#EAF6FF] to-[#EAF6FF]">
-          {/* ambient background glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] bg-[#0284C7]/5 rounded-full blur-3xl -z-0" />
-          <motion.div animate={{ x: [0, 40, -30, 0], y: [0, -30, 25, 0], scale: [1, 1.08, 0.95, 1] }} transition={{ duration: 16, repeat: Infinity, ease: "easeInOut" }} className="absolute -top-20 left-[8%] w-[380px] h-[380px] bg-[#22D3EE]/20 rounded-full blur-3xl" />
-          <motion.div animate={{ x: [0, 40, -30, 0], y: [0, -30, 25, 0], scale: [1, 1.08, 0.95, 1] }} transition={{ duration: 20, repeat: Infinity, ease: "easeInOut", repeatType: "mirror" }} className="absolute bottom-0 right-[6%] w-[440px] h-[440px] bg-[#0284C7]/20 rounded-full blur-3xl" />
-
-          <div className="max-w-[1440px] mx-auto relative z-10">
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
-
-              {/* LEFT — Male doctor */}
-              <div className="hidden lg:flex lg:col-span-3 justify-end items-end h-full">
-                <Parallax speed={0.07} enterDelay={0.3} className="relative w-full max-w-[300px]">
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[260px] h-[260px] bg-[#0284C7]/15 rounded-full blur-3xl -z-10" />
-                  <motion.img animate={{ y: [0, -10, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }}
-                    src="hero_male_doctor.png"
-                    alt="Male doctor pointing toward specialty medicine offerings"
-                    className="w-full h-[440px] object-contain object-bottom drop-shadow-2xl"
-                  />
-                  <motion.div animate={{ y: [0, -8, 0], rotate: [0, -1.5, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }} className="absolute right-2 top-16 bg-white rounded-2xl shadow-lg shadow-[#0284C7]/20 border border-[#0284C7]/10 px-4 py-3 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#22D3EE] animate-pulse" />
-                    <span className="font-mono text-[11px] font-semibold text-[#082F49]">
-                      GENUINE STOCK
-                    </span>
-                  </motion.div>
-                </Parallax>
-              </div>
-
-              {/* CENTER CONTENT */}
-              <div className="lg:col-span-6 text-center relative z-10">
-                <Reveal>
-                  <span className="font-mono text-[13px] tracking-[0.2em] text-[#0284C7] font-semibold mb-6 block bg-white/60 inline-block px-4 py-1.5 rounded-full border border-[#0284C7]/20">
-                    TRUSTED SPECIALTY THERAPEUTICS PLATFORM
-                  </span>
-                  <h1 className="font-display font-bold text-[40px] leading-[1.1] sm:text-[52px] md:text-[64px] text-[#082F49] mb-6 tracking-tight max-w-4xl mx-auto">
-                    Super specialty medicine, <br />
-                    <GradientText>delivered direct</GradientText> to you.
-                  </h1>
-                </Reveal>
-                
-                <Reveal delay={150}>
-                  <p className="text-lg leading-relaxed text-[#4B6584] max-w-2xl mx-auto mb-10">
-                    Access genuine, critical therapies for oncology, nephrology, and rare disorders.
-                    Genuine medicines sourced straight from the manufacturer.
-                  </p>
-                </Reveal>
-
-                {/* Quick Actions */}
-                <Reveal delay={450}>
-                  <div className="mt-8 flex flex-wrap justify-center gap-4">
-                    <MotionLink href="/contact" whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="flex items-center gap-2 bg-white text-[#082F49] border border-[#0284C7]/20 px-6 py-3 rounded-full hover:bg-[#EAF6FF] transition-shadow duration-300 hover:shadow-lg hover:shadow-[#0284C7]/20 relative overflow-hidden font-medium shadow-sm">
-                      <ShineSweep />
-                      <UploadCloud size={18} className="text-[#0284C7]" /> Order via
-                      Prescription
-                    </MotionLink>
-                    <MotionLink href="/contact" whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }} className="flex items-center gap-2 bg-white text-[#082F49] border border-[#0284C7]/20 px-6 py-3 rounded-full hover:bg-[#EAF6FF] transition-shadow duration-300 hover:shadow-lg hover:shadow-[#0284C7]/20 relative overflow-hidden font-medium shadow-sm">
-                      <ShineSweep />
-                      <Activity size={18} className="text-[#0284C7]" /> Patient
-                      Assistance Program
-                    </MotionLink>
-                  </div>
-                </Reveal>
-              </div>
-
-              {/* RIGHT — Female doctor */}
-              <div className="hidden lg:flex lg:col-span-3 justify-start items-end h-full">
-                <Parallax speed={0.12} enterDelay={0.5} className="relative w-full max-w-[300px]">
-                  <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[260px] h-[260px] bg-[#0284C7]/15 rounded-full blur-3xl -z-10" />
-                  <motion.img animate={{ y: [0, -10, 0] }} transition={{ duration: 6, repeat: Infinity, ease: "easeInOut", delay: -3 }}
-                    src="hero_female_doctor.png"
-                    alt="Female doctor pointing toward specialty medicine offerings"
-                    className="w-full h-[440px] object-contain object-bottom drop-shadow-2xl"
-                  />
-                  <motion.div animate={{ y: [0, -8, 0], rotate: [0, -1.5, 0] }} transition={{ duration: 5, repeat: Infinity, ease: "easeInOut", delay: -2 }} className="absolute left-2 top-16 bg-white rounded-2xl shadow-lg shadow-[#0284C7]/20 border border-[#0284C7]/10 px-4 py-3 flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-[#0284C7] animate-pulse" />
-                    <span className="font-mono text-[11px] font-semibold text-[#082F49]">
-                      GENUINE THERAPIES
-                    </span>
-                  </motion.div>
-                </Parallax>
-              </div>
-
-            </div>
-          </div>
-        </section>
-
         {/* HEXACARE STORY — 3D cinematic, lazy-loaded */}
         <HexacareStory />
 
