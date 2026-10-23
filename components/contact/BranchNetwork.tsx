@@ -1,15 +1,26 @@
 'use client'
+import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import type { Map as LeafletMap, Marker } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { Check, Copy, Crosshair, Loader2, MapPin, Navigation, Phone } from "lucide-react";
+import { ChevronLeft, ChevronRight, Crosshair, Loader2, Mail, MapPin, Navigation, Phone } from "lucide-react";
 import { useAutoTour } from "./useAutoTour";
+
+export interface BranchPhoto {
+  src: string;
+  caption: string;
+  position?: string; // CSS object-position for cropping, defaults to centre
+  fit?: "cover" | "contain"; // contain shows the whole photo over a blurred copy of itself
+}
 
 export interface Branch {
   type: string;
   city: string;
   address: string;
   phones?: { label: string; number: string; dial?: string }[]; // dial: digits for tel:, defaults to number
+  whatsapp?: string; // international digits, e.g. 919876543210
+  email?: string;
+  photos?: BranchPhoto[];
 }
 
 /* Approximate neighbourhood centres, used for map pins and distance. */
@@ -20,6 +31,120 @@ const COORDS: Record<string, [number, number]> = {
   Madurai: [9.9230, 78.0990],
   Bengaluru: [12.9116, 77.6389],
 };
+
+/* lucide has no brand icons, so this is the WhatsApp logo (Simple Icons, CC0). */
+function WhatsAppIcon({ size = 14, className = "" }: { size?: number; className?: string }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" className={className}>
+      <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
+    </svg>
+  );
+}
+
+/* Hero photo with a thumbnail strip. Sits flush at the top of a branch card. */
+function BranchGallery({ city, photos, dark }: { city: string; photos: BranchPhoto[]; dark: boolean }) {
+  const [i, setI] = useState(0);
+  const [hold, setHold] = useState(false); // pointer/focus is on the gallery
+  const [inView, setInView] = useState(false);
+  const box = useRef<HTMLDivElement>(null);
+  const go = (n: number) => setI((n + photos.length) % photos.length);
+  const cur = photos[i];
+
+  /* Slides advance when the progress bar finishes, so pausing it pauses the show. */
+  useEffect(() => {
+    const el = box.current;
+    if (!el) return;
+    const obs = new IntersectionObserver(([e]) => setInView(e.intersectionRatio >= 0.3), { threshold: 0.3 });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, []);
+  const paused = hold || !inView;
+  const arrow =
+    "absolute top-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-[#041B2D]/55 backdrop-blur-md border border-white/20 text-white flex items-center justify-center opacity-100 lg:opacity-0 lg:group-hover/gal:opacity-100 focus-visible:opacity-100 hover:bg-[#041B2D]/80 transition-all cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#22D3EE]";
+
+  return (
+    <div
+      className="-mx-6 -mt-6 mb-5"
+      onClick={(e) => e.stopPropagation()}
+      onMouseEnter={() => setHold(true)}
+      onMouseLeave={() => setHold(false)}
+      onFocus={() => setHold(true)}
+      onBlur={(e) => { if (!e.currentTarget.contains(e.relatedTarget as Node | null)) setHold(false); }}
+    >
+      <div
+        ref={box}
+        className="group/gal relative aspect-[16/10] overflow-hidden rounded-t-[1.75rem] bg-[#06263B]"
+      >
+        {photos.map((p, idx) => (
+          <div key={p.src} className={`hx-kb absolute inset-0 ${idx === i ? "opacity-100 scale-[1.06]" : "opacity-0 scale-100"}`}>
+            {p.fit === "contain" && (
+              <Image src={p.src} alt="" fill sizes="(min-width: 1024px) 40vw, 100vw" className="object-cover scale-125 blur-2xl brightness-75" />
+            )}
+            <Image
+              src={p.src}
+              alt={idx === i ? `${city} office — ${p.caption}` : ""}
+              fill
+              sizes="(min-width: 1024px) 40vw, 100vw"
+              style={{ objectPosition: p.position }}
+              className={p.fit === "contain" ? "object-contain" : "object-cover"}
+            />
+          </div>
+        ))}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#041B2D]/80 via-transparent to-[#041B2D]/15" />
+        {photos.length > 1 && (
+          <span aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] bg-white/15">
+            <span
+              key={i}
+              onAnimationEnd={() => go(i + 1)}
+              className="hx-slide-bar block h-full origin-left bg-[#22D3EE]"
+              style={{ animationPlayState: paused ? "paused" : "running" }}
+            />
+          </span>
+        )}
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 flex items-end justify-between gap-3 p-5">
+          <span key={i} className="inline-flex items-center gap-2 rounded-full bg-white/10 backdrop-blur-md border border-white/20 px-3.5 py-1.5 text-[11px] font-bold uppercase tracking-[0.18em] text-white animate-[hx-cap_.5s_ease-out]">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#22D3EE]" />
+            {cur.caption}
+          </span>
+          <span className="font-mono text-[11px] tracking-widest text-white/70" aria-hidden="true">
+            {String(i + 1).padStart(2, "0")} / {String(photos.length).padStart(2, "0")}
+          </span>
+        </div>
+        {photos.length > 1 && (
+          <>
+            <button type="button" onClick={() => go(i - 1)} aria-label={`Previous ${city} photo`} className={`${arrow} left-3`}>
+              <ChevronLeft size={18} />
+            </button>
+            <button type="button" onClick={() => go(i + 1)} aria-label={`Next ${city} photo`} className={`${arrow} right-3`}>
+              <ChevronRight size={18} />
+            </button>
+          </>
+        )}
+      </div>
+
+      {photos.length > 1 && (
+        <div className={`flex gap-2 overflow-x-auto px-6 pt-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden`}>
+          {photos.map((p, idx) => (
+            <button
+              key={p.src}
+              type="button"
+              onClick={() => setI(idx)}
+              aria-label={`Show ${p.caption}`}
+              aria-current={idx === i}
+              className={`relative shrink-0 h-12 w-16 overflow-hidden rounded-lg transition-all duration-300 cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#22D3EE] ${
+                idx === i
+                  ? "ring-2 ring-[#22D3EE] ring-offset-2 " + (dark ? "ring-offset-[#082F49]" : "ring-offset-white")
+                  : "opacity-60 hover:opacity-100"
+              }`}
+            >
+              <Image src={p.src} alt="" fill sizes="64px" style={{ objectPosition: p.position }} className="object-cover" />
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const ALL = "all";
 
@@ -49,7 +174,6 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
   const [active, setActive] = useState<string | null>(null);
   const [geo, setGeo] = useState<GeoState>("idle");
   const [userPos, setUserPos] = useState<[number, number] | null>(null);
-  const [copied, setCopied] = useState<string | null>(null);
 
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<LeafletMap | null>(null);
@@ -257,16 +381,6 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
     );
   };
 
-  const copyAddress = async (b: Branch) => {
-    try {
-      await navigator.clipboard.writeText(b.address);
-      setCopied(b.city);
-      setTimeout(() => setCopied((c) => (c === b.city ? null : c)), 2000);
-    } catch {
-      /* clipboard unavailable — silently ignore */
-    }
-  };
-
   const geoMessage: Record<GeoState, string> = {
     idle: "",
     locating: "Finding your location…",
@@ -279,6 +393,10 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
   return (
     <div ref={rootRef} className="space-y-8">
       <style>{`
+        @keyframes hx-slide { from { transform: scaleX(0); } to { transform: scaleX(1); } }
+        .hx-slide-bar { animation: hx-slide 4.5s linear forwards; }
+        .hx-kb { transition: opacity 1.1s ease-in-out, transform 6s cubic-bezier(.2,.6,.2,1); }
+        @keyframes hx-cap { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
         @keyframes hx-flow { to { stroke-dashoffset: -20; } }
         @keyframes hx-ping { 0% { transform: scale(.7); opacity: .6; } 100% { transform: scale(2.1); opacity: 0; } }
         @keyframes hx-tour { from { transform: scaleX(0); } to { transform: scaleX(1); } }
@@ -311,8 +429,9 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
         .hx-map .leaflet-bar a { color: #082F49; }
 
         @media (prefers-reduced-motion: reduce) {
-          .hx-card-in, .hx-route, .hx-beat, .hx-pin--active .hx-pin__ping { animation: none !important; }
+          .hx-card-in, .hx-route, [class*="hx-cap"], .hx-slide-bar, .hx-beat, .hx-pin--active .hx-pin__ping { animation: none !important; }
           .hx-beat { stroke-dashoffset: 0; }
+          .hx-kb { transition: opacity .3s !important; transform: none !important; }
         }
       `}</style>
 
@@ -421,6 +540,8 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
                     : "border-[#0284C7]/15 shadow-sm hover:shadow-[0_24px_50px_-24px_rgba(2,132,199,.5)] hover:border-[#0284C7]/40"
                 }`}
               >
+                {b.photos && b.photos.length > 0 && <BranchGallery city={b.city} photos={b.photos} dark={isHub} />}
+
                 <div className="flex flex-wrap items-center gap-2 mb-4">
                   <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-full border ${isHub ? "text-[#22D3EE] bg-white/5 border-white/10" : "text-[#0284C7] bg-[#0284C7]/10 border-[#0284C7]/20"}`}>
                     <MapPin size={11} /> {b.type}
@@ -442,15 +563,29 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
                 </div>
                 <p className={`mt-2 text-sm leading-relaxed ${isHub ? "text-[#9DC8E6]" : "text-[#4B6584]"}`}>{b.address}</p>
 
-                {b.phones && b.phones.length > 0 && (
+                {((b.phones && b.phones.length > 0) || b.whatsapp || b.email) && (
                   <ul className={`mt-3 space-y-1 text-sm ${isHub ? "text-[#BFE3F7]" : "text-[#082F49]"}`}>
-                    {b.phones.map((ph) => (
+                    {b.phones?.map((ph) => (
                       <li key={ph.number} className="flex items-center gap-2">
                         <Phone size={14} className="text-[#0284C7] shrink-0" />
                         <span className="opacity-70">{ph.label}</span>
                         <a href={`tel:${(ph.dial ?? ph.number).replace(/[^+\d]/g, "")}`} className="font-semibold hover:underline">{ph.number}</a>
                       </li>
                     ))}
+                    {b.whatsapp && (
+                      <li className="flex items-center gap-2">
+                        <WhatsAppIcon size={14} className="text-[#25D366] shrink-0" />
+                        <span className="opacity-70">WhatsApp</span>
+                        <a href={`https://wa.me/${b.whatsapp}`} target="_blank" rel="noopener noreferrer" className="font-semibold hover:underline">+{b.whatsapp.slice(0, 2)} {b.whatsapp.slice(2, 7)} {b.whatsapp.slice(7)}</a>
+                      </li>
+                    )}
+                    {b.email && (
+                      <li className="flex items-center gap-2">
+                        <Mail size={14} className="text-[#0284C7] shrink-0" />
+                        <span className="opacity-70">Email</span>
+                        <a href={`mailto:${b.email}`} className="font-semibold hover:underline break-all">{b.email}</a>
+                      </li>
+                    )}
                   </ul>
                 )}
 
@@ -473,13 +608,6 @@ export default function BranchNetwork({ branches }: { branches: Branch[] }) {
                   >
                     <Navigation size={15} /> Get Directions
                   </a>
-                  <button
-                    onClick={() => copyAddress(b)}
-                    className={`inline-flex items-center gap-2 min-h-11 px-4 rounded-full text-sm font-bold border transition-colors cursor-pointer ${isHub ? "border-white/20 text-white hover:bg-white/10" : "border-[#082F49]/20 text-[#082F49] hover:bg-[#EAF6FF]"}`}
-                  >
-                    {copied === b.city ? <Check size={15} className="text-emerald-500" /> : <Copy size={15} />}
-                    <span aria-live="polite">{copied === b.city ? "Copied" : "Copy Address"}</span>
-                  </button>
                 </div>
                 {tour.running && isActive && (
                   <span aria-hidden="true" className="absolute left-6 right-6 bottom-0 h-[3px] rounded-full bg-[#22D3EE]/20 overflow-hidden">

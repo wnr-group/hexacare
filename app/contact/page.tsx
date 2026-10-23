@@ -19,7 +19,7 @@ import {
   Radar,
   ShieldCheck,
 } from "lucide-react";
-import BranchNetwork from "@/components/contact/BranchNetwork";
+import BranchNetwork, { type Branch } from "@/components/contact/BranchNetwork";
 
 /* ---------- UI Helpers ---------- */
 function Reveal({ children, className = "", delay = 0 }: { children: ReactNode; className?: string; delay?: number }) {
@@ -70,11 +70,28 @@ const supportRoutes = [
   { icon: MessageSquare, title: "Media & Press", desc: "For PR inquiries, interviews, and media resources.", email: "press@hexacare.in" }
 ];
 
-const locations = [
+const locations: Branch[] = [
   {
     type: "Head Office",
     city: "Chennai",
-    address: "Hexacare Pharmaceuticals Pvt Ltd, Old No.149, New No.50, Ground Floor & 1st Floor, Eldams Road, Teynampet, Chennai 600018."
+    address: "Hexacare Pharmaceuticals Pvt Ltd, Old No.149, New No.50, Ground Floor & 1st Floor, Eldams Road, Teynampet, Chennai 600018.",
+    phones: [
+      { label: "Office", number: "4204 2063 / 64 / 37 / 38", dial: "04442042063" },
+      { label: "Mobile", number: "99622 29605", dial: "+919962229605" }
+    ],
+    whatsapp: "919940313588",
+    email: "chennai@hexacare.in",
+    photos: [
+      { src: "/branches/chennai/reception.webp", caption: "Reception" },
+      { src: "/branches/chennai/reception-2.webp", caption: "Reception desk", position: "50% 45%" },
+      { src: "/branches/chennai/entrance.webp", caption: "Entrance", position: "50% 45%" },
+      { src: "/branches/chennai/office.webp", caption: "Office floor", position: "50% 55%" },
+      { src: "/branches/chennai/workstation.webp", caption: "Work area", position: "50% 55%" },
+      { src: "/branches/chennai/workstation-2.webp", caption: "Operations desk", position: "50% 55%" },
+      { src: "/branches/chennai/storage.webp", caption: "Medicine storage", position: "50% 50%" },
+      { src: "/branches/chennai/storage-2.webp", caption: "Storage aisle", position: "50% 50%" },
+      { src: "/branches/chennai/cold-room.webp", caption: "Cold room", position: "50% 50%" }
+    ]
   },
   {
     type: "Branch Office",
@@ -83,17 +100,63 @@ const locations = [
     phones: [
       { label: "Office", number: "0422-4954112/13", dial: "04224954112" },
       { label: "Mobile", number: "98848 45804", dial: "+919884845804" }
+    ],
+    whatsapp: "919629199621",
+    email: "coimbatore@hexacare.in",
+    photos: [
+      { src: "/branches/coimbatore/building.webp", caption: "Our office", position: "50% 35%" },
+      { src: "/branches/coimbatore/reception.webp", caption: "Reception" },
+      { src: "/branches/coimbatore/reception-2.webp", caption: "Reception & waiting area" },
+      { src: "/branches/coimbatore/cabin.webp", caption: "Manager's cabin" },
+      { src: "/branches/coimbatore/cabin-2.webp", caption: "Executive cabin" },
+      { src: "/branches/coimbatore/storage.webp", caption: "Medicine storage" },
+      { src: "/branches/coimbatore/storage-2.webp", caption: "Storage aisle" },
+      { src: "/branches/coimbatore/cold-room.webp", caption: "Cold room" }
     ]
   },
   {
     type: "Branch Office",
     city: "Trichy",
-    address: "Hexacare Pharmaceuticals Pvt Ltd, NO:D-322, Anna Nagar, 5th cross, Tennur, Trichy 620017"
+    address: "Hexacare Pharmaceuticals Pvt Ltd, NO:D-322, Anna Nagar, 5th cross, Tennur, Trichy 620017",
+    phones: [
+      { label: "Office", number: "0431-3502082", dial: "04313502082" },
+      { label: "Mobile", number: "98419 82636", dial: "+919841982636" }
+    ],
+    whatsapp: "919790431350",
+    email: "trichy@hexacare.in",
+    photos: [
+      { src: "/branches/trichy/front.webp", caption: "Our office", position: "50% 45%" },
+      { src: "/branches/trichy/street.webp", caption: "Street view", position: "50% 55%" },
+      { src: "/branches/trichy/street-2.webp", caption: "Anna Nagar, Tennur", position: "50% 55%" },
+      { src: "/branches/trichy/signboard.webp", caption: "Entrance", position: "50% 40%" },
+      { src: "/branches/trichy/waiting.webp", caption: "Waiting area" },
+      { src: "/branches/trichy/waiting-2.webp", caption: "Reception" },
+      { src: "/branches/trichy/entrance.webp", caption: "Reception hall", position: "50% 60%" },
+      { src: "/branches/trichy/workstation.webp", caption: "Operations desk", position: "50% 60%" },
+      { src: "/branches/trichy/workstation-2.webp", caption: "Work area", position: "50% 55%" },
+      { src: "/branches/trichy/workstation-3.webp", caption: "Work area", position: "50% 55%" },
+      { src: "/branches/trichy/shrine.webp", caption: "Prayer nook", position: "50% 55%" },
+      { src: "/branches/trichy/cabin.webp", caption: "Manager's cabin", position: "50% 60%" },
+      { src: "/branches/trichy/storage.webp", caption: "Medicine storage", position: "50% 60%" },
+      { src: "/branches/trichy/storage-2.webp", caption: "Storage aisle", position: "50% 55%" },
+      { src: "/branches/trichy/storage-3.webp", caption: "Dispatch & storage", position: "50% 55%" },
+      { src: "/branches/trichy/cold-storage.webp", caption: "Cold storage", position: "50% 60%" }
+    ]
   },
   {
     type: "Branch Office",
     city: "Madurai",
-    address: "Hexacare Pharmaceuticals Pvt Ltd, Door No.16/2 Rathna Towers, First floor, Sakthi Velammal 1st Main(Avenue street), S.S.Colony, Madurai."
+    address: "Hexacare Pharmaceuticals Pvt Ltd, Door No.16/2 Rathna Towers, First floor, Sakthi Velammal 1st Main(Avenue street), S.S.Colony, Madurai 625010.",
+    phones: [
+      { label: "Office", number: "0452-4371500 / 2500 / 7966358", dial: "04524371500" },
+      { label: "Mobile", number: "98416 93344", dial: "+919841693344" }
+    ],
+    whatsapp: "919994406926",
+    email: "hexacaremadurai@gmail.com",
+    photos: [
+      { src: "/branches/madurai/building.webp", caption: "Our office", fit: "contain" },
+      { src: "/branches/madurai/building-2.webp", caption: "Rathna Towers, S.S. Colony", fit: "contain" }
+    ]
   },
   {
     type: "Branch Office",

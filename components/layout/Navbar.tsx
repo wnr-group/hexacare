@@ -3,19 +3,17 @@ import React, { useState } from 'react';
 import { Menu, X, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import ViewMedicinesModal from '@/components/products/ViewMedicinesModal';
 import OrderMedicinesModal from '@/components/products/OrderMedicinesModal';
 
 const navLinks = [
   { name: 'Home', href: '/' },
   { name: 'About', href: '/about' },
-  { name: 'Products', href: '/product' },
+  { name: 'Medicines', href: '/medicines' },
   { name: 'Contact Us', href: '/contact' },
 ];
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [isOrderModalOpen, setIsOrderModalOpen] = useState(false);
   const pathname = usePathname();
 
@@ -81,15 +79,8 @@ const Navbar = () => {
               })}
             </div>
 
-            {/* Highlighted Explore Products & Pulsing Order Button (Desktop) */}
+            {/* Pulsing Order Button (Desktop) */}
             <div className="hidden lg:flex items-center gap-3 ml-4">
-              <button
-                onClick={() => setIsModalOpen(true)}
-                className="group flex items-center gap-1.5 px-5 py-2.5 text-sm font-bold text-[#0284C7] bg-[#EAF6FF] hover:bg-[#0284C7] hover:text-white border border-[#0284C7]/30 rounded-full transition-all duration-300 shadow-sm cursor-pointer hover:shadow-md active:scale-95"
-              >
-                Explore Products
-              </button>
-
               <button
                 onClick={() => setIsOrderModalOpen(true)}
                 className="group flex items-center gap-2 px-5 py-2.5 text-sm font-bold text-white bg-[#0284C7] rounded-full hover:bg-[#075985] shadow-lg shadow-sky-500/20 hover:-translate-y-0.5 active:translate-y-0 cursor-pointer transition-all animate-[navPulse_2.5s_infinite_ease-in-out]"
@@ -141,16 +132,6 @@ const Navbar = () => {
               <button
                 onClick={() => {
                   setIsOpen(false);
-                  setIsModalOpen(true);
-                }}
-                className="flex items-center justify-center gap-2 w-full px-6 py-2.5 text-sm font-bold text-[#0284C7] bg-[#EAF6FF] border border-[#0284C7]/20 rounded-xl hover:bg-[#0284C7] hover:text-white transition-all cursor-pointer shadow-sm"
-              >
-                Explore Products
-              </button>
-              
-              <button
-                onClick={() => {
-                  setIsOpen(false);
                   setIsOrderModalOpen(true);
                 }}
                 className="flex items-center justify-center gap-2 w-full px-6 py-3.5 text-sm font-bold text-white bg-[#0284C7] rounded-xl hover:bg-[#075985] shadow-md shadow-sky-500/20 transition-all active:scale-[0.98] cursor-pointer animate-[navPulse_2.5s_infinite_ease-in-out]"
@@ -164,7 +145,6 @@ const Navbar = () => {
       </nav>
 
       {/* Reusable Modals */}
-      <ViewMedicinesModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} />
       <OrderMedicinesModal isOpen={isOrderModalOpen} onClose={() => setIsOrderModalOpen(false)} />
 
       <style>{`
